@@ -101,7 +101,7 @@ export default function Gallery({ gallery: model }: { gallery?: any }) {
             <h2
               className="font-display font-light tracking-tight"
               style={{
-                fontSize: "clamp(2.8rem, 4.5vw, 4.5rem)",
+                fontSize: "clamp(2.4rem, 6vw, 4.5rem)",
                 lineHeight: 1.05,
                 color: "rgb(74, 36, 50)",
               }}
@@ -122,7 +122,7 @@ export default function Gallery({ gallery: model }: { gallery?: any }) {
           >
             <Link
               to="/portafolio"
-              className="group flex items-center justify-center gap-3 px-8 h-[50px] rounded-full transition-all duration-500 overflow-hidden relative"
+              className="group flex items-center justify-center gap-3 px-6 md:px-8 h-[48px] md:h-[50px] rounded-full transition-all duration-500 overflow-hidden relative"
               style={{
                 background:
                   "linear-gradient(135deg, rgb(210,110,135) 0%, rgb(175,80,110) 100%)",
@@ -157,6 +157,18 @@ export default function Gallery({ gallery: model }: { gallery?: any }) {
                 delay: (index % 3) * 0.1, // Stagger effect
                 ease: [0.25, 0.46, 0.45, 0.94],
               }}
+              whileHover={{
+                y: -4,
+                boxShadow: "0 25px 60px rgba(210,110,135,0.15), inset 0 2px 10px rgba(255,255,255,0.9)",
+                borderColor: "rgba(235,168,185,0.5)",
+                transition: { duration: 0.4 }
+              }}
+              whileTap={{
+                scale: 0.98,
+                boxShadow: "0 10px 30px rgba(210,110,135,0.1), inset 0 2px 10px rgba(255,255,255,0.9)",
+                borderColor: "rgba(235,168,185,0.45)",
+                transition: { duration: 0.2 }
+              }}
               className="break-inside-avoid relative overflow-hidden group rounded-[16px]"
               style={{
                 border: "1px solid rgba(235,168,185,0.25)",
@@ -164,19 +176,6 @@ export default function Gallery({ gallery: model }: { gallery?: any }) {
                   "0 10px 35px rgba(210,110,135,0.06), inset 0 2px 10px rgba(255,255,255,0.9)",
                 background: "linear-gradient(145deg, #ffffff 0%, #fff7f9 100%)",
                 transform: "translateZ(0)",
-                transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow =
-                  "0 25px 60px rgba(210,110,135,0.15), inset 0 2px 10px rgba(255,255,255,0.9)";
-                e.currentTarget.style.transform = "translateY(-4px)";
-                e.currentTarget.style.borderColor = "rgba(235,168,185,0.5)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow =
-                  "0 10px 35px rgba(210,110,135,0.06), inset 0 2px 10px rgba(255,255,255,0.9)";
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.borderColor = "rgba(235,168,185,0.25)";
               }}
             >
               <Link
@@ -187,17 +186,9 @@ export default function Gallery({ gallery: model }: { gallery?: any }) {
                   src={img.url}
                   alt={img.alt || img.category || "Maquillaje Karin"}
                   className="w-full h-auto block"
-                  style={{
-                    transition:
-                      "transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "scale(1.02)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "scale(1)";
-                  }}
                   loading={index < 3 ? "eager" : "lazy"}
+                  decoding="async"
+                  fetchPriority={index === 0 ? "high" : "auto"}
                 />
 
                 {/* OVERLAY EDITORIAL DE HOVER (Teasers) */}

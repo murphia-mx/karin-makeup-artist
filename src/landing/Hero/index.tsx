@@ -30,7 +30,7 @@ export default function Hero({ hero }: { hero?: any }) {
     <section
       ref={ref}
       id="inicio"
-      className="relative w-full h-[100dvh] min-h-[680px] overflow-hidden"
+      className="relative w-full h-[100dvh] min-h-[600px] md:min-h-[680px] overflow-hidden"
       style={{ background: "rgb(30, 18, 26)" }}
     >
       {/* ─────────────────────────────────────────────
@@ -43,7 +43,7 @@ export default function Hero({ hero }: { hero?: any }) {
         <motion.img
           src={image}
           alt="Karin Makeup Artist"
-          className="w-full h-full object-cover object-[60%_15%]"
+          className="w-full h-full object-cover object-[75%_20%] md:object-[60%_15%]"
           fetchPriority="high"
           decoding="async"
           animate={{ scale: [1, 1.03, 1] }}
@@ -88,7 +88,7 @@ export default function Hero({ hero }: { hero?: any }) {
               rgba(196,118,156,0.10) 60%,
               rgba(196,118,156,0) 75%
             )
-          `
+          `,
         }}
       />
 
@@ -119,7 +119,7 @@ export default function Hero({ hero }: { hero?: any }) {
           ───────────────────────────────────────────── */}
       <motion.div
         style={{ y: contentY, opacity: contentFade }}
-        className="absolute inset-0 flex items-center"
+        className="absolute inset-0 flex items-center pt-[calc(env(safe-area-inset-top,0px)+60px)] md:pt-0"
       >
         <div
           className="
@@ -153,7 +153,7 @@ export default function Hero({ hero }: { hero?: any }) {
               <span
                 className="font-sans font-medium uppercase"
                 style={{
-                  fontSize: "9.5px",
+                  fontSize: "clamp(8.5px, 2.5vw, 9.5px)",
                   letterSpacing: "0.28em",
                   color: "rgba(237, 210, 215, 0.95)",
                 }}
@@ -178,7 +178,7 @@ export default function Hero({ hero }: { hero?: any }) {
                 }}
                 className="block"
                 style={{
-                  fontSize: "clamp(2.4rem, 3.8vw, 4rem)",
+                  fontSize: "clamp(2.1rem, 7vw, 3.2rem)",
                   color: "rgba(255, 252, 251, 0.98)",
                 }}
               >
@@ -195,7 +195,7 @@ export default function Hero({ hero }: { hero?: any }) {
                 }}
                 className="block italic pr-4"
                 style={{
-                  fontSize: "clamp(2.4rem, 4.2vw, 4rem)",
+                  fontSize: "clamp(2.1rem, 7.5vw, 3.2rem)",
                   color: "rgb(237, 210, 215)",
                 }}
               >
@@ -212,9 +212,9 @@ export default function Hero({ hero }: { hero?: any }) {
                 ease: [0.25, 0.46, 0.45, 0.94],
                 delay: 0.55,
               }}
-              className="font-sans font-light leading-[1.75] mb-12"
+              className="font-sans font-light leading-[1.75] mb-12 md:mb-12"
               style={{
-                fontSize: "14.5px",
+                fontSize: "clamp(13.5px, 3.5vw, 14.5px)",
                 color: "rgba(255, 252, 251, 0.95)",
                 maxWidth: "340px",
               }}

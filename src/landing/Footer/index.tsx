@@ -242,11 +242,11 @@ export default function Footer({ footer: model }: { footer?: any }) {
 
         {/* ── BOTTOM BAR ── */}
         <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-[rgba(237,210,215,0.15)] to-transparent" />
-        <div className="py-7 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="font-sans text-[9px] text-[rgba(255,248,252,0.28)] uppercase tracking-[0.15em]">
+        <div className="pt-7 pb-[calc(env(safe-area-inset-bottom,0px)+28px)] sm:pb-7 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-3 text-center sm:text-left">
+          <p className="font-sans text-[9px] text-[rgba(255,248,252,0.28)] uppercase tracking-[0.15em] order-2 sm:order-1">
             {copyrightText}
           </p>
-          <p className="font-sans text-[9px] text-[rgba(255,248,252,0.28)] uppercase tracking-[0.15em]">
+          <p className="font-sans text-[9px] text-[rgba(255,248,252,0.28)] uppercase tracking-[0.15em] order-1 sm:order-2">
             Diseño por{" "}
             <span className="text-[rgba(237,210,215,0.4)] font-semibold">
               Murphia

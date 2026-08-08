@@ -486,7 +486,7 @@ export default function Services() {
             }}
             className="font-display font-light tracking-tight mb-6"
             style={{
-              fontSize: "clamp(2.8rem, 4.5vw, 4.5rem)",
+              fontSize: "clamp(2.4rem, 6.5vw, 4.5rem)",
               lineHeight: 1.05,
               color: "rgb(74, 36, 50)",
             }}
@@ -498,7 +498,7 @@ export default function Services() {
           </motion.h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10 items-stretch">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-8 xl:gap-10 items-stretch">
           {data.items.map((service: any, index: number) => {
             const content =
               LUXURY_CONTENT[service.searchKey] || DEFAULT_CONTENT;
@@ -514,6 +514,18 @@ export default function Services() {
                   delay: index * 0.1,
                   ease: [0.25, 0.46, 0.45, 0.94],
                 }}
+                whileHover={{
+                  y: -6,
+                  boxShadow: "0 35px 70px rgba(210,110,135,0.18), inset 0 2px 10px rgba(255,255,255,0.9)",
+                  borderColor: "rgba(235,168,185,0.55)",
+                  transition: { duration: 0.4 }
+                }}
+                whileTap={{
+                  scale: 0.98,
+                  boxShadow: "0 10px 30px rgba(210,110,135,0.1), inset 0 2px 10px rgba(255,255,255,0.9)",
+                  borderColor: "rgba(235,168,185,0.45)",
+                  transition: { duration: 0.2 }
+                }}
                 className="group relative flex flex-col h-full bg-white overflow-hidden rounded-[16px]"
                 style={{
                   background:
@@ -521,19 +533,6 @@ export default function Services() {
                   border: "1px solid rgba(235,168,185,0.3)",
                   boxShadow:
                     "0 10px 35px rgba(210,110,135,0.06), inset 0 2px 10px rgba(255,255,255,0.9)",
-                  transition: "all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow =
-                    "0 35px 70px rgba(210,110,135,0.18), inset 0 2px 10px rgba(255,255,255,0.9)";
-                  e.currentTarget.style.transform = "translateY(-6px)";
-                  e.currentTarget.style.borderColor = "rgba(235,168,185,0.55)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow =
-                    "0 10px 35px rgba(210,110,135,0.06), inset 0 2px 10px rgba(255,255,255,0.9)";
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.borderColor = "rgba(235,168,185,0.3)";
                 }}
               >
                 {/* 1. ZONA FOTOGRÁFICA */}
@@ -651,29 +650,23 @@ export default function Services() {
                     {/* BENEFICIOS (Cápsulas) */}
                     <div className="flex flex-col gap-2.5 mb-8">
                       {content.capsules.map((capsule, cIndex) => (
-                        <div
+                        <motion.div
                           key={cIndex}
-                          className="flex items-center gap-3.5 p-3.5 rounded-xl transition-all duration-500"
+                          className="flex items-center gap-3.5 p-3.5 rounded-xl"
+                          whileHover={{
+                            y: -1,
+                            boxShadow: "0 6px 15px rgba(210,110,135,0.1)",
+                            borderColor: "rgba(235,168,185,0.5)",
+                          }}
+                          whileTap={{
+                            scale: 0.98,
+                            boxShadow: "0 2px 8px rgba(210,110,135,0.05)",
+                          }}
                           style={{
                             background:
                               "linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,247,250,0.8) 100%)",
                             border: "1px solid rgba(235,168,185,0.3)",
                             boxShadow: "0 2px 12px rgba(210,110,135,0.04)",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.boxShadow =
-                              "0 6px 15px rgba(210,110,135,0.1)";
-                            e.currentTarget.style.transform =
-                              "translateY(-1px)";
-                            e.currentTarget.style.borderColor =
-                              "rgba(235,168,185,0.5)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.boxShadow =
-                              "0 2px 12px rgba(210,110,135,0.04)";
-                            e.currentTarget.style.transform = "translateY(0)";
-                            e.currentTarget.style.borderColor =
-                              "rgba(235,168,185,0.3)";
                           }}
                         >
                           <div
@@ -711,7 +704,7 @@ export default function Services() {
                               {capsule.subtitle}
                             </span>
                           </div>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
 
@@ -778,9 +771,19 @@ export default function Services() {
 
                       {/* BOTÓN CTA IMPOSIBLE DE IGNORAR */}
                       <div className="flex flex-col items-center">
-                        <a
+                        <motion.a
                           href="#contacto"
                           className="group flex items-center justify-center w-full relative overflow-hidden"
+                          whileHover={{
+                            y: -2,
+                            background: "linear-gradient(135deg, rgb(225,125,150) 0%, rgb(190,95,125) 100%)",
+                            boxShadow: "0 12px 32px rgba(210,110,135,0.45), inset 0 1px 0 rgba(255,255,255,0.3)",
+                          }}
+                          whileTap={{
+                            scale: 0.97,
+                            background: "linear-gradient(135deg, rgb(200,100,125) 0%, rgb(165,70,100) 100%)",
+                            boxShadow: "0 4px 16px rgba(210,110,135,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
+                          }}
                           style={{
                             height: "56px",
                             borderRadius: "10px",
@@ -793,27 +796,9 @@ export default function Services() {
                             letterSpacing: "0.15em",
                             textTransform: "uppercase",
                             textDecoration: "none",
-                            transition:
-                              "all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
                             boxShadow:
                               "0 8px 24px rgba(210,110,135,0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
                             border: "1px solid rgba(225,125,150,0.5)",
-                          }}
-                          onMouseEnter={(e) => {
-                            const el = e.currentTarget as HTMLElement;
-                            el.style.background =
-                              "linear-gradient(135deg, rgb(225,125,150) 0%, rgb(190,95,125) 100%)";
-                            el.style.boxShadow =
-                              "0 12px 32px rgba(210,110,135,0.45), inset 0 1px 0 rgba(255,255,255,0.3)";
-                            el.style.transform = "translateY(-2px)";
-                          }}
-                          onMouseLeave={(e) => {
-                            const el = e.currentTarget as HTMLElement;
-                            el.style.background =
-                              "linear-gradient(135deg, rgb(210,110,135) 0%, rgb(175,80,110) 100%)";
-                            el.style.boxShadow =
-                              "0 8px 24px rgba(210,110,135,0.3), inset 0 1px 0 rgba(255,255,255,0.2)";
-                            el.style.transform = "translateY(0)";
                           }}
                         >
                           <span className="relative z-10 flex items-center gap-2.5">
@@ -831,7 +816,7 @@ export default function Services() {
                               <polyline points="12 5 19 12 12 19"></polyline>
                             </svg>
                           </span>
-                        </a>
+                        </motion.a>
 
                         <div className="flex items-center gap-1.5 mt-3.5 opacity-85">
                           <span className="text-[10.5px]">✨</span>

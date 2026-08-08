@@ -38,7 +38,7 @@ export const ReviewsSection = ({ testimonials }: ReviewsSectionProps) => {
                 {testimonials?.eyebrow || "Clientas Felices"}
               </span>
             </div>
-            <h2 className="font-display font-light tracking-tight" style={{ fontSize: "clamp(2.8rem, 4.5vw, 4.5rem)", lineHeight: 1.05, color: "rgb(74, 36, 50)" }}>
+            <h2 className="font-display font-light tracking-tight" style={{ fontSize: "clamp(2.4rem, 6vw, 4.5rem)", lineHeight: 1.05, color: "rgb(74, 36, 50)" }}>
               {testimonials?.title || "Historias"}{" "}
               <em className="italic" style={{ color: "rgb(210,110,135)" }}>
                 {testimonials?.italicWord || "reales."}
@@ -53,28 +53,23 @@ export const ReviewsSection = ({ testimonials }: ReviewsSectionProps) => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex-shrink-0"
           >
-            <button
+            <motion.button
               onClick={() => setIsStepperOpen(true)}
               className="group flex items-center justify-center h-[52px] px-8 rounded-full cursor-pointer outline-none relative overflow-hidden"
               style={{
                 backgroundColor: "#ffffff",
                 border: "1px solid rgba(217, 124, 152, 0.4)",
                 color: "rgb(74,36,50)",
-                transition: "all 280ms cubic-bezier(0.22, 0.61, 0.36, 1)",
                 boxShadow: "none",
               }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = "#D97C98";
-                e.currentTarget.style.borderColor = "#D97C98";
-                e.currentTarget.style.color = "#ffffff";
-                e.currentTarget.style.boxShadow = "0 8px 24px rgba(217,124,152,0.25)";
+              whileHover={{
+                backgroundColor: "#D97C98",
+                borderColor: "#D97C98",
+                color: "#ffffff",
+                boxShadow: "0 8px 24px rgba(217,124,152,0.25)",
+                transition: { duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "#ffffff";
-                e.currentTarget.style.borderColor = "rgba(217, 124, 152, 0.4)";
-                e.currentTarget.style.color = "rgb(74,36,50)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
+              whileTap={{ scale: 0.96 }}
             >
               <Plus 
                 className="w-[22px] h-[22px] transition-all duration-280 mr-[14px]"
@@ -95,7 +90,7 @@ export const ReviewsSection = ({ testimonials }: ReviewsSectionProps) => {
                   transform: rotate(90deg);
                 }
               `}</style>
-            </button>
+            </motion.button>
           </motion.div>
         </div>
 

@@ -50,6 +50,7 @@ export const ReviewCard = ({ review, index, isFeatured }: ReviewCardProps) => {
     <motion.article
       {...animationProps}
       viewport={{ once: true, margin: "-50px" }}
+      whileTap={{ scale: 0.985 }}
       className={clsx(
         "group relative flex flex-col p-6 sm:p-8 rounded-[24px] transition-all h-full",
         isFeatured 
@@ -127,7 +128,7 @@ export const ReviewCard = ({ review, index, isFeatured }: ReviewCardProps) => {
           <button 
             type="button"
             aria-label="Opciones de reseña"
-            className="flex items-center justify-center w-[40px] h-[40px] min-w-[40px] min-h-[40px] rounded-full bg-transparent hover:bg-[#FFF5F7] active:bg-[#FCECF0] text-[#C7C7CC] hover:text-[#D97C98] active:text-[#C66A86] transition-colors duration-200 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[#D97C98]/40 focus-visible:ring-offset-1 -mt-1.5 -mr-2"
+            className="flex items-center justify-center w-[44px] h-[44px] min-w-[44px] min-h-[44px] rounded-full bg-transparent hover:bg-[#FFF5F7] active:bg-[#FCECF0] text-[#C7C7CC] hover:text-[#D97C98] active:text-[#C66A86] transition-colors duration-200 shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-[#D97C98]/40 focus-visible:ring-offset-1 -mt-1.5 -mr-2"
             style={{ writingMode: 'horizontal-tb' }}
           >
             <MoreHorizontal 
@@ -179,7 +180,7 @@ export const ReviewCard = ({ review, index, isFeatured }: ReviewCardProps) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               onClick={() => setIsExpanded(!isExpanded)}
-              className="mt-3 inline-flex items-center self-start gap-1 text-[13px] font-medium text-[#D97C98] hover:text-[#AF6476] transition-colors font-sans"
+              className="mt-2 py-2 inline-flex items-center self-start gap-1 text-[13px] font-medium text-[#D97C98] hover:text-[#AF6476] transition-colors font-sans"
             >
               {isExpanded ? 'Ver menos' : 'Leer más'}
               <ChevronDown className={clsx("w-3.5 h-3.5 transition-transform", isExpanded && "rotate-180")} />

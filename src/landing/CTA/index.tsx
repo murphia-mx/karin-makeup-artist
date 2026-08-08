@@ -4,7 +4,7 @@ export default function CTA({ cta: model }: { cta?: any }) {
   const ctaUrl = model?.actionUrl || "#contacto";
 
   return (
-    <section className="relative w-full py-32 md:py-48 flex items-center justify-center overflow-hidden bg-[#2A1B23]">
+    <section className="relative w-full py-24 md:py-48 flex items-center justify-center overflow-hidden bg-[#2A1B23]">
       
       {/* ── IMAGEN DE FONDO (Abstracta, minimalista, zoom imperceptible) ── */}
       <motion.div 
@@ -56,7 +56,7 @@ export default function CTA({ cta: model }: { cta?: any }) {
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 1.5, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="font-sans font-medium tracking-tight text-white mb-6"
-          style={{ fontSize: "clamp(32px, 5vw, 52px)", lineHeight: 1.15 }}
+          style={{ fontSize: "clamp(28px, 7vw, 52px)", lineHeight: 1.15 }}
         >
           Reserva cuando estés lista.
         </motion.h2>
@@ -68,7 +68,7 @@ export default function CTA({ cta: model }: { cta?: any }) {
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 1.5, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="font-sans font-light text-[rgba(255,252,251,0.7)] mb-12"
-          style={{ fontSize: "15px", maxWidth: "480px", lineHeight: 1.7 }}
+          style={{ fontSize: "clamp(14px, 4vw, 15px)", maxWidth: "480px", lineHeight: 1.7 }}
         >
           Cada maquillaje está diseñado para que disfrutes tu evento sintiéndote segura, cómoda y completamente tú.
         </motion.p>
@@ -80,7 +80,7 @@ export default function CTA({ cta: model }: { cta?: any }) {
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 1.5, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
-          <a
+          <motion.a
             href={ctaUrl}
             style={{
               display: "inline-flex",
@@ -97,26 +97,18 @@ export default function CTA({ cta: model }: { cta?: any }) {
               fontWeight: 600,
               letterSpacing: "0.02em",
               textDecoration: "none",
-              transition: "all 0.25s ease",
               boxShadow: "0 4px 12px rgba(0,0,0,0)",
             }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "#C56E8E";
-              (e.currentTarget as HTMLElement).style.boxShadow =
-                "0 8px 24px rgba(197, 110, 142, 0.35)";
-              (e.currentTarget as HTMLElement).style.transform =
-                "translateY(-2px)";
+            whileHover={{
+              backgroundColor: "#C56E8E",
+              boxShadow: "0 8px 24px rgba(197, 110, 142, 0.35)",
+              y: -2,
+              transition: { duration: 0.25 }
             }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLElement).style.background = "#CF7F9B";
-              (e.currentTarget as HTMLElement).style.boxShadow =
-                "0 4px 12px rgba(0,0,0,0)";
-              (e.currentTarget as HTMLElement).style.transform =
-                "translateY(0)";
-            }}
+            whileTap={{ scale: 0.96 }}
           >
             Reservar mi cita
-          </a>
+          </motion.a>
         </motion.div>
       </div>
     </section>
