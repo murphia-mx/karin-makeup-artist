@@ -1,0 +1,30 @@
+project_id = "karin-web"
+
+[api]
+port = 54321
+
+[db]
+port = 54322
+
+[studio]
+port = 54323
+
+[edge_runtime]
+enabled = true
+port = 54324
+
+[auth]
+port = 54327
+site_url = "http://127.0.0.1:5173"
+additional_redirect_urls = ["https://127.0.0.1:5173"]
+
+[functions.generate-advisor-report]
+enabled = true
+verify_jwt = false
+import_map = "./functions/generate-advisor-report/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/generate-advisor-report/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/generate-advisor-report/*.html" ]

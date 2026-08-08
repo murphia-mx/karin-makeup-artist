@@ -1,0 +1,7 @@
+/* Minimal styles to normalize cmdk elements */
+[cmdk-dialog] {
+  outline: none;
+}
+[cmdk-group-heading] {
+  padding-bottom: 8px;
+}
