@@ -1,6 +1,7 @@
 import { Search } from 'lucide-react';
 import { clsx } from 'clsx';
 import { type Review, REVIEW_STATUS } from '../../reviews/types/Review';
+import { motion } from 'framer-motion';
 
 interface ModerationHeaderProps {
   currentTab: Review['status'] | 'all';
@@ -19,34 +20,46 @@ export const ModerationHeader = ({ currentTab, onTabChange, searchQuery, onSearc
   ];
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-brand-border flex flex-col md:flex-row justify-between items-center gap-4 mb-8 shadow-sm">
-      <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 hide-scrollbar">
-        {tabs.map((tab) => (
-          <button
-            key={tab.value}
-            onClick={() => onTabChange(tab.value)}
-            className={clsx(
-              "px-5 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all duration-200",
-              currentTab === tab.value
-                ? "bg-brand-text text-white shadow-md"
-                : "bg-brand-surface text-brand-text-muted hover:bg-brand-border/30 hover:text-brand-text"
-            )}
-          >
-            {tab.label}
-          </button>
-        ))}
+    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
+      
+      {/* iOS Segmented Control */}
+      <div className="flex p-1 bg-[#EBDDE2]/40 rounded-[1.25rem] w-full lg:w-auto overflow-x-auto hide-scrollbar">
+        {tabs.map((tab) => {
+          const isActive = currentTab === tab.value;
+          return (
+            <button
+              key={tab.value}
+              onClick={() => onTabChange(tab.value)}
+              className={clsx(
+                "relative px-6 py-2.5 rounded-2xl text-[13px] font-medium transition-colors duration-300 whitespace-nowrap",
+                isActive ? "text-[#301C27]" : "text-[#765E68] hover:text-[#301C27]"
+              )}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="activeTabModeration"
+                  className="absolute inset-0 bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                  initial={false}
+                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      <div className="relative w-full md:w-72">
+      {/* Search Input */}
+      <div className="relative w-full lg:w-80 group">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <Search className="h-4 w-4 text-brand-text-muted" />
+          <Search className="h-4 w-4 text-[#765E68]/60 group-focus-within:text-[#CF7F9B] transition-colors" />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Buscar por cliente o contenido..."
-          className="w-full pl-10 pr-4 py-3 rounded-xl border border-brand-border bg-brand-surface/50 text-sm font-light text-brand-text focus:outline-none focus:ring-1 focus:ring-brand-text transition-all"
+          placeholder="Buscar reseña o clienta..."
+          className="w-full pl-11 pr-4 py-3 rounded-[1.25rem] border border-[#EBDDE2]/50 bg-white text-[13px] font-light text-[#301C27] focus:outline-none focus:border-[#EBDDE2] focus:shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all placeholder-[#765E68]/50"
         />
       </div>
     </div>

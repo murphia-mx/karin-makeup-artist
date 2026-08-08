@@ -1,32 +1,47 @@
-import { Send, Inbox, Star, Settings } from 'lucide-react';
+import { Send, Inbox, Star, Settings, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { clsx } from 'clsx';
 
 const actions = [
-  { label: 'Invitar clienta', icon: Send, href: '/admin/invitations', color: 'text-white', bg: 'bg-[#D99AA8]', border: 'border-transparent' },
-  { label: 'Leer opiniones', icon: Inbox, href: '/admin/moderation', color: 'text-[#3D2C2C]', bg: 'bg-[#FDFBFB]', border: 'border-[#EFE7E4]' },
-  { label: 'Lo mejor de ti', icon: Star, href: '/admin/moderation?filter=featured', color: 'text-[#E5B25D]', bg: 'bg-[#FDFBFB]', border: 'border-[#EFE7E4]' },
-  { label: 'Configuración', icon: Settings, href: '/admin/settings', color: 'text-[#7A6B67]', bg: 'bg-[#FDFBFB]', border: 'border-[#EFE7E4]' },
+  { label: 'Invitar clienta', icon: Send, href: '/admin/invitations', primary: true },
+  { label: 'Leer opiniones', icon: Inbox, href: '/admin/moderation' },
+  { label: 'Lo mejor de ti', icon: Star, href: '/admin/moderation?filter=featured' },
+  { label: 'Configuración', icon: Settings, href: '/admin/settings' },
 ];
 
 export const QuickActions = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="flex flex-col gap-3">
       {actions.map((action, i) => (
         <motion.button
           key={action.label}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05 }}
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: i * 0.05, duration: 0.3 }}
           onClick={() => navigate(action.href)}
-          className={`flex items-center gap-4 p-4 rounded-2xl border ${action.border} ${action.bg === 'bg-[#D99AA8]' ? 'bg-[#D99AA8] text-white hover:bg-[#C88A98]' : 'bg-white hover:border-[#D99AA8]/30'} shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group`}
+          className={clsx(
+            "group flex items-center justify-between p-4 rounded-[1.25rem] transition-all duration-300 w-full",
+            action.primary 
+              ? "bg-[#301C27] text-white hover:bg-[#CF7F9B] hover:shadow-[0_4px_16px_rgba(207,127,155,0.2)]" 
+              : "bg-white border border-[#EBDDE2]/50 hover:border-[#EBDDE2] text-[#301C27] hover:bg-[#FAF7F7]"
+          )}
         >
-          <div className={`w-10 h-10 shrink-0 rounded-xl ${action.bg} flex items-center justify-center border ${action.border} group-hover:scale-110 transition-transform duration-300`}>
-            <action.icon className={`w-5 h-5 ${action.color}`} />
+          <div className="flex items-center gap-4">
+            <div className={clsx(
+              "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+              action.primary ? "bg-white/10 text-white group-hover:bg-white/20" : "bg-[#FAF7F7] text-[#765E68] group-hover:text-[#CF7F9B]"
+            )}>
+              <action.icon className="w-3.5 h-3.5" />
+            </div>
+            <span className="text-[13px] font-medium tracking-wide">{action.label}</span>
           </div>
-          <span className={`text-sm font-medium text-left ${action.bg === 'bg-[#D99AA8]' ? 'text-white' : 'text-[#3D2C2C]'}`}>{action.label}</span>
+          <ChevronRight className={clsx(
+            "w-4 h-4 transition-transform group-hover:translate-x-1",
+            action.primary ? "text-white/50" : "text-[#765E68]/30"
+          )} />
         </motion.button>
       ))}
     </div>

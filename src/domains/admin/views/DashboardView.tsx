@@ -8,36 +8,61 @@ import { ActivityTimeline } from '../components/Dashboard/ActivityTimeline';
 
 export const DashboardView = () => {
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-12">
-      {/* SECTION 1: Business Health (Hero) */}
-      <section>
+    <div className="w-full pb-20 font-sans">
+      
+      {/* 1. Encabezado Editorial (Saludo y Contexto) */}
+      <section className="mb-12 md:mb-16">
         <BusinessHealth />
       </section>
 
-      {/* SECTION 2: Quick Actions */}
-      <section>
-        <QuickActions />
+      {/* 2. La IA como Insight Principal Orgánico (no widget) */}
+      <section className="mb-16 md:mb-20">
+        <AiAdvisorWidget />
       </section>
 
-      {/* SECTION 3: Business Intelligence Grid */}
-      <section className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      {/* 3. Datos Duros: Jerarquía tipográfica, no tarjetas idénticas */}
+      <section className="mb-20">
+        <div className="mb-6 flex items-baseline justify-between border-b border-[#EBDDE2]/50 pb-4">
+          <h2 className="text-[10px] font-semibold text-[#765E68]/60 uppercase tracking-widest">Estado del Negocio</h2>
+        </div>
+        <BusinessKPIs />
+      </section>
+
+      {/* 4. Columnas Naturales (Gráficos vs Acciones) */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
         
-        {/* Left Column (Main Content: KPIs, Charts, Insights) */}
-        <div className="xl:col-span-2 flex flex-col">
-          {/* Top Row: Core KPIs */}
-          <BusinessKPIs />
+        {/* Columna Principal: Gráficos y Tendencias */}
+        <div className="lg:col-span-8 flex flex-col gap-16">
+          <div>
+            <div className="mb-8 flex items-baseline justify-between border-b border-[#EBDDE2]/50 pb-4">
+              <h2 className="text-[10px] font-semibold text-[#765E68]/60 uppercase tracking-widest">Rendimiento Histórico</h2>
+            </div>
+            <DashboardCharts />
+          </div>
           
-          {/* Middle Row: Graphical Analysis */}
-          <DashboardCharts />
-          
-          {/* Bottom Row: AI & Insights */}
-          <BusinessInsights />
-          <AiAdvisorWidget />
+          <div>
+            <div className="mb-8 flex items-baseline justify-between border-b border-[#EBDDE2]/50 pb-4">
+              <h2 className="text-[10px] font-semibold text-[#765E68]/60 uppercase tracking-widest">Análisis Cualitativo</h2>
+            </div>
+            <BusinessInsights />
+          </div>
         </div>
 
-        {/* Right Column (Activity & Timeline) */}
-        <div className="xl:col-span-1 h-full">
-          <ActivityTimeline />
+        {/* Columna Secundaria: Operaciones (Flotante, más sutil) */}
+        <div className="lg:col-span-4 flex flex-col gap-12">
+          <div>
+            <div className="mb-6 flex items-baseline justify-between border-b border-[#EBDDE2]/50 pb-4">
+              <h2 className="text-[10px] font-semibold text-[#765E68]/60 uppercase tracking-widest">Acciones Rápidas</h2>
+            </div>
+            <QuickActions />
+          </div>
+
+          <div>
+            <div className="mb-6 flex items-baseline justify-between border-b border-[#EBDDE2]/50 pb-4">
+              <h2 className="text-[10px] font-semibold text-[#765E68]/60 uppercase tracking-widest">Registro de Actividad</h2>
+            </div>
+            <ActivityTimeline />
+          </div>
         </div>
         
       </section>

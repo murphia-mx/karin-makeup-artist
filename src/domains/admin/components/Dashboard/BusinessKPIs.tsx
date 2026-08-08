@@ -1,20 +1,16 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAnalyticsKPIs } from '../../hooks/useAnalytics';
-import { Star, ShieldCheck, Heart, Info } from 'lucide-react';
+import { Star, ShieldCheck, Heart } from 'lucide-react';
 import { REVIEW_STATUS } from '../../../../domains/reviews/types/Review';
 import { useNavigate } from 'react-router-dom';
 import { AnimatedCounter } from '../../../../components/ui/AnimatedCounter';
+import { clsx } from 'clsx';
 
 const KpiSkeleton = () => (
-  <div className="bg-white rounded-[1.5rem] p-6 h-[142px] border border-[#EFE7E4] shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col justify-between">
-    <div className="flex items-start justify-between mb-4">
-      <div className="w-10 h-10 rounded-xl bg-[#FDFBFB] border border-[#EFE7E4] animate-pulse" />
-      <div className="w-20 h-3 rounded bg-brand-gray-light animate-pulse" />
-    </div>
-    <div>
-      <div className="w-16 h-8 rounded bg-brand-gray-light animate-pulse mb-2" />
-      <div className="w-32 h-3 rounded bg-brand-gray-light animate-pulse" />
-    </div>
+  <div className="flex flex-col gap-2">
+    <div className="w-8 h-8 rounded-full bg-[#EBDDE2]/30 animate-pulse mb-2" />
+    <div className="w-16 h-10 rounded-lg bg-[#EBDDE2]/30 animate-pulse" />
+    <div className="w-24 h-4 rounded-md bg-[#EBDDE2]/30 animate-pulse" />
   </div>
 );
 
@@ -26,99 +22,108 @@ export const BusinessKPIs = () => {
     navigate('/admin/moderation', { state: { filter } });
   };
 
-  const cards = kpis ? [
-    {
-      title: 'Nuevas opiniones',
-      value: kpis.reviews.pending,
-      suffix: '',
-      decimals: 0,
-      subtitle: kpis.reviews.pending === 0 ? 'Todo está al día' : (kpis.reviews.pending === 1 ? 'Tienes 1 opinión esperando revisión' : `Tienes ${kpis.reviews.pending} opiniones esperando revisión`),
-      icon: <Heart className="w-5 h-5" />,
-      color: 'text-[#D99AA8]',
-      bg: 'bg-[#FDFBFB]',
-      border: 'border-[#D99AA8]/20',
-      tooltip: 'Opiniones pendientes de moderación',
-      onClick: () => handleNavigateToModeration(REVIEW_STATUS.PENDING)
-    },
+  const metrics = kpis ? [
     {
       title: 'Satisfacción',
       value: kpis.rating.average,
-      suffix: '',
       decimals: 1,
-      subtitle: `De ${kpis.reviews.approved} reseñas aprobadas`,
-      icon: <Star className="w-5 h-5" />,
-      color: 'text-amber-500',
-      bg: 'bg-amber-50/50',
-      border: 'border-amber-100',
-      tooltip: 'Calificación promedio del negocio',
-      onClick: () => handleNavigateToModeration(REVIEW_STATUS.APPROVED)
+      subtitle: `Promedio de ${kpis.reviews.approved} opiniones`,
+      icon: <Star className="w-4 h-4" />,
+      color: 'text-[#D9A05B]',
+      onClick: () => handleNavigateToModeration(REVIEW_STATUS.APPROVED),
+      isPrimary: true
     },
     {
-      title: 'Clientas reales',
-      value: kpis.reviews.verified,
-      suffix: '',
+      title: 'Por Moderar',
+      value: kpis.reviews.pending,
       decimals: 0,
-      subtitle: 'Visitas comprobadas',
-      icon: <ShieldCheck className="w-5 h-5" />,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50/50',
-      border: 'border-emerald-100',
-      tooltip: 'Clientas que dejaron su reseña a través de una invitación válida de su cita.',
-      onClick: () => {}
+      subtitle: kpis.reviews.pending === 0 ? 'Al día' : `${kpis.reviews.pending} esperando`,
+      icon: <Heart className="w-4 h-4" />,
+      color: 'text-[#CF7F9B]',
+      onClick: () => handleNavigateToModeration(REVIEW_STATUS.PENDING),
+      isPrimary: false
+    },
+    {
+      title: 'Clientas Reales',
+      value: kpis.reviews.verified,
+      decimals: 0,
+      subtitle: 'Servicios validados',
+      icon: <ShieldCheck className="w-4 h-4" />,
+      color: 'text-[#765E68]',
+      onClick: () => {},
+      isPrimary: false
     }
   ] : [];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="flex flex-col md:flex-row items-stretch md:items-end gap-12 md:gap-16">
       <AnimatePresence mode="wait">
         {isLoading ? (
-          [1, 2, 3].map((i) => (
-            <motion.div
-              key={`skeleton-${i}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <KpiSkeleton />
-            </motion.div>
-          ))
+          <div className="flex gap-12 w-full">
+            <KpiSkeleton />
+            <KpiSkeleton />
+          </div>
         ) : (
-          cards.map((card, i) => (
-            <motion.div
-              key={card.title}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05, duration: 0.3, ease: "easeOut" }}
-              onClick={card.onClick}
-              className={`group bg-white rounded-[1.5rem] p-6 border shadow-[0_4px_20px_rgba(0,0,0,0.01)] flex flex-col justify-between transition-all duration-300 cursor-pointer hover:shadow-[0_12px_60px_rgba(61,44,44,0.08)] hover:-translate-y-1 ${card.border}`}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-2.5 rounded-xl border ${card.bg} ${card.color} ${card.border} transition-colors group-hover:bg-white`}>
-                  {card.icon}
+          <>
+            {/* Primary Metric */}
+            {metrics.filter(m => m.isPrimary).map((metric, i) => (
+              <motion.div
+                key={metric.title}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1, duration: 0.4, ease: "easeOut" }}
+                onClick={metric.onClick}
+                className="flex flex-col group cursor-pointer"
+              >
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={clsx("w-6 h-6 flex items-center justify-center rounded-full bg-[#FAF7F7] border border-[#EBDDE2]/50", metric.color)}>
+                    {metric.icon}
+                  </div>
+                  <span className="text-[10px] uppercase tracking-widest text-[#765E68] font-medium">{metric.title}</span>
                 </div>
                 
-                <div className="flex items-center gap-1.5 relative">
-                  <span className="text-[10px] font-medium text-[#7A6B67] uppercase tracking-wider">{card.title}</span>
-                  <div className="group/tooltip relative">
-                    <Info className="w-3 h-3 text-[#EFE7E4] cursor-help transition-colors group-hover:text-[#D99AA8]/50" />
-                    <div className="absolute bottom-full right-0 mb-2 w-48 p-3 bg-white border border-[#EFE7E4] text-[#5A4A4A] text-xs font-light leading-relaxed rounded-xl opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 shadow-xl z-10 pointer-events-none">
-                      {card.tooltip}
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-7xl md:text-8xl font-display font-light text-[#301C27] tracking-tighter leading-none">
+                    <AnimatedCounter value={metric.value} decimals={metric.decimals} />
+                  </span>
+                </div>
+
+                <p className="text-sm text-[#765E68]/80 font-light mt-2 tracking-wide">{metric.subtitle}</p>
+              </motion.div>
+            ))}
+
+            {/* Divider */}
+            <div className="hidden md:block w-[1px] self-stretch bg-gradient-to-b from-transparent via-[#EBDDE2] to-transparent mx-4" />
+
+            {/* Secondary Metrics */}
+            <div className="flex flex-col md:flex-row gap-10 md:gap-16 md:pb-2">
+              {metrics.filter(m => !m.isPrimary).map((metric, i) => (
+                <motion.div
+                  key={metric.title}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: (i + 1) * 0.1, duration: 0.4, ease: "easeOut" }}
+                  onClick={metric.onClick}
+                  className="flex flex-col group cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className={clsx("transition-transform duration-300 group-hover:scale-110", metric.color)}>
+                      {metric.icon}
                     </div>
+                    <span className="text-[10px] uppercase tracking-widest text-[#765E68] font-medium">{metric.title}</span>
                   </div>
-                </div>
-              </div>
-              
-              <div className="flex items-end justify-between">
-                <div>
-                  <div className="text-3xl font-light text-[#3D2C2C] mb-1">
-                    <AnimatedCounter value={card.value} decimals={card.decimals} suffix={card.suffix} />
+                  
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-3xl md:text-4xl font-display font-light text-[#301C27] tracking-tight">
+                      <AnimatedCounter value={metric.value} decimals={metric.decimals} />
+                    </span>
                   </div>
-                  <div className="text-xs text-[#7A6B67] font-light">{card.subtitle}</div>
-                </div>
-              </div>
-            </motion.div>
-          ))
+
+                  <p className="text-xs text-[#765E68]/60 font-light mt-1 tracking-wide">{metric.subtitle}</p>
+                </motion.div>
+              ))}
+            </div>
+          </>
         )}
       </AnimatePresence>
     </div>

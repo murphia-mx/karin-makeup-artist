@@ -89,8 +89,9 @@ export type Database = {
         Row: {
           id: string
           client_name: string
-          client_email: string
+          client_email: string | null
           service_id: string
+          service_date: string | null
           used: boolean
           expires_at: string
           created_at: string
@@ -98,8 +99,9 @@ export type Database = {
         Insert: {
           id?: string
           client_name: string
-          client_email: string
+          client_email?: string | null
           service_id: string
+          service_date?: string | null
           used?: boolean
           expires_at: string
           created_at?: string
@@ -107,7 +109,9 @@ export type Database = {
         Update: {
           id?: string
           client_name?: string
-          client_email?: string
+          client_email?: string | null
+          service_id?: string
+          service_date?: string | null
           service_id?: string
           used?: boolean
           expires_at?: string

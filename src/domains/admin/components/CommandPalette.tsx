@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Command } from 'cmdk';
 import { useNavigate } from 'react-router-dom';
-import { Search, LayoutDashboard, Inbox, LineChart, Link, Settings } from 'lucide-react';
+import { Search, LayoutDashboard, ShieldCheck, UserPlus, Sparkles, Images, CalendarDays } from 'lucide-react';
 import './CommandPalette.css'; // Minimal CSS for cmdk internal classes
 
 export const CommandPalette = () => {
@@ -50,20 +50,24 @@ export const CommandPalette = () => {
               <span>Dashboard Principal</span>
             </Command.Item>
             <Command.Item onSelect={() => runCommand(() => navigate('/admin/moderation'))} className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer aria-selected:bg-brand-surface aria-selected:text-brand-text text-[#5A4A4A] transition-colors">
-              <Inbox className="w-4 h-4" />
-              <span>Cola de Moderación</span>
-            </Command.Item>
-            <Command.Item onSelect={() => runCommand(() => navigate('/admin/analytics'))} className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer aria-selected:bg-brand-surface aria-selected:text-brand-text text-[#5A4A4A] transition-colors">
-              <LineChart className="w-4 h-4" />
-              <span>Analíticas y Rendimiento</span>
+              <ShieldCheck className="w-4 h-4" />
+              <span>Moderación</span>
             </Command.Item>
             <Command.Item onSelect={() => runCommand(() => navigate('/admin/invitations'))} className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer aria-selected:bg-brand-surface aria-selected:text-brand-text text-[#5A4A4A] transition-colors">
-              <Link className="w-4 h-4" />
-              <span>Generar Invitaciones</span>
+              <UserPlus className="w-4 h-4" />
+              <span>Invitaciones</span>
             </Command.Item>
-            <Command.Item onSelect={() => runCommand(() => navigate('/admin/settings'))} className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer aria-selected:bg-brand-surface aria-selected:text-brand-text text-[#5A4A4A] transition-colors">
-              <Settings className="w-4 h-4" />
-              <span>Configuración del Sistema</span>
+            <Command.Item onSelect={() => runCommand(() => navigate('/admin/services'))} className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer aria-selected:bg-brand-surface aria-selected:text-brand-text text-[#5A4A4A] transition-colors">
+              <Sparkles className="w-4 h-4" />
+              <span>Servicios</span>
+            </Command.Item>
+            <Command.Item onSelect={() => runCommand(() => navigate('/admin/gallery'))} className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer aria-selected:bg-brand-surface aria-selected:text-brand-text text-[#5A4A4A] transition-colors">
+              <Images className="w-4 h-4" />
+              <span>Galería</span>
+            </Command.Item>
+            <Command.Item onSelect={() => runCommand(() => navigate('/admin/bookings'))} className="flex items-center gap-3 px-3 py-3 rounded-xl cursor-pointer aria-selected:bg-brand-surface aria-selected:text-brand-text text-[#5A4A4A] transition-colors">
+              <CalendarDays className="w-4 h-4" />
+              <span>Reservas</span>
             </Command.Item>
           </Command.Group>
         </Command.List>

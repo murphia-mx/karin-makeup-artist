@@ -34,6 +34,7 @@ const ModerationView = lazy(() =>
     default: m.ModerationView,
   })),
 );
+const InvitationsView = lazy(() => import('./domains/invitations/views/InvitationsView').then(m => ({ default: m.InvitationsView })));
 
 // Workspace Domain
 const WorkspaceLayout = lazy(() =>
@@ -96,6 +97,10 @@ const PortfolioPage = lazy(() =>
   import("./portfolio/PortfolioPage").then((m) => ({ default: m.default })),
 );
 
+const PublicReviewView = lazy(() =>
+  import("./domains/reviews/views/PublicReviewView").then((m) => ({ default: m.PublicReviewView })),
+);
+
 const PublicSite = () => (
   <Suspense
     fallback={
@@ -146,6 +151,12 @@ function App() {
               <PortfolioPage />
             </Suspense>
           } />
+          
+          <Route path="/leave-review" element={
+            <Suspense fallback={<div className="min-h-screen bg-white" />}>
+              <PublicReviewView />
+            </Suspense>
+          } />
 
           {/* Authentication */}
           <Route path="/auth" element={<AuthLayout />}>
@@ -175,12 +186,24 @@ function App() {
                 }
               />
               <Route
-                path="insights"
-                element={<div>Insights Placeholder</div>}
+                path="services"
+                element={<div className="p-8 text-brand-text-muted font-light">Servicios (Próximamente)</div>}
+              />
+              <Route
+                path="gallery"
+                element={<div className="p-8 text-brand-text-muted font-light">Galería (Próximamente)</div>}
+              />
+              <Route
+                path="bookings"
+                element={<div className="p-8 text-brand-text-muted font-light">Reservas (Próximamente)</div>}
               />
               <Route
                 path="invitations"
-                element={<div>Invitations Placeholder</div>}
+                element={
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <InvitationsView />
+                  </Suspense>
+                }
               />
               <Route
                 path="settings"
