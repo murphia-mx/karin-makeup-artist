@@ -40,18 +40,26 @@ const fetchAllPublicData = async () => {
     
   if (sErr) throw new Error(`Services fetch failed: ${sErr.message}`);
 
-  // Fetch gallery (favorites/cover items)
+  // Fetch gallery from the new CMS
   const { data: galleryItems, error: gErr } = await supabase
-    .from('gallery_items')
+    .from('gallery_projects')
     .select('*')
-    .or('is_favorite.eq.true,is_cover.eq.true')
-    .order('created_at', { ascending: false });
-    
+    .eq('active', true)
+    .eq('is_favorite', true)
+    .order('display_order', { ascending: true })
+    .limit(6);
+
   if (gErr) throw new Error(`Gallery fetch failed: ${gErr.message}`);
-  
+
+  console.log("GALLERY DIAGNOSTIC:", {
+    galleryItems,
+    gErr,
+    query: "eq('active', true).limit(6)"
+  });
+
   const gallery = (galleryItems || []).map((g: any) => ({
-    url: g.url,
-    alt: g.title || 'Galería',
+    url: g.image_url?.replace(/^\/?public\//, '/') || '',
+    alt: g.title || g.category || 'Galería',
     category: g.category
   }));
 

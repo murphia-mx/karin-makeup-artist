@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import type { ServiceExtended } from "../../domains/workspace/types/WorkspaceEntities";
 
 // Imágenes premium
 const SERVICE_IMAGES: Record<string, string> = {
@@ -427,8 +428,35 @@ const FINAL_SERVICES = {
   ],
 };
 
-export default function Services() {
-  const data = FINAL_SERVICES;
+interface ServicesProps {
+  services?: ServiceExtended[];
+}
+
+export default function Services({ services = [] }: ServicesProps) {
+  const mappedServices = services
+    .filter((service) => service.active !== false && service.show_in_landing !== false)
+    .map((service) => {
+      const searchKey =
+        service.category?.toLowerCase().trim() ||
+        service.slug?.toLowerCase().trim() ||
+        "";
+
+      return {
+        ...service,
+        id: service.id,
+        searchKey,
+        titleTop:
+          service.landing_title_top || service.short_name || service.name,
+        titleBottom: service.landing_title_bottom || "",
+        price_from: service.price_from,
+        is_featured: service.featured,
+      };
+    });
+
+  const data = {
+    ...FINAL_SERVICES,
+    items: mappedServices.length > 0 ? mappedServices : FINAL_SERVICES.items,
+  };
 
   return (
     <section
@@ -516,15 +544,17 @@ export default function Services() {
                 }}
                 whileHover={{
                   y: -6,
-                  boxShadow: "0 35px 70px rgba(210,110,135,0.18), inset 0 2px 10px rgba(255,255,255,0.9)",
+                  boxShadow:
+                    "0 35px 70px rgba(210,110,135,0.18), inset 0 2px 10px rgba(255,255,255,0.9)",
                   borderColor: "rgba(235,168,185,0.55)",
-                  transition: { duration: 0.4 }
+                  transition: { duration: 0.4 },
                 }}
                 whileTap={{
                   scale: 0.98,
-                  boxShadow: "0 10px 30px rgba(210,110,135,0.1), inset 0 2px 10px rgba(255,255,255,0.9)",
+                  boxShadow:
+                    "0 10px 30px rgba(210,110,135,0.1), inset 0 2px 10px rgba(255,255,255,0.9)",
                   borderColor: "rgba(235,168,185,0.45)",
-                  transition: { duration: 0.2 }
+                  transition: { duration: 0.2 },
                 }}
                 className="group relative flex flex-col h-full bg-white overflow-hidden rounded-[16px]"
                 style={{
@@ -538,7 +568,7 @@ export default function Services() {
                 {/* 1. ZONA FOTOGRÁFICA */}
                 <div className="relative w-full aspect-[16/11] overflow-hidden bg-[#fff5f7] flex-shrink-0">
                   <img
-                    src={getServiceImage(service.searchKey)}
+                    src={service.cover_image ? service.cover_image.replace(/^\/?public\//, '/') : getServiceImage(service.searchKey)}
                     alt={`${service.titleTop} ${service.titleBottom}`}
                     className="w-full h-full object-cover object-[center_20%]"
                     style={{
@@ -776,13 +806,17 @@ export default function Services() {
                           className="group flex items-center justify-center w-full relative overflow-hidden"
                           whileHover={{
                             y: -2,
-                            background: "linear-gradient(135deg, rgb(225,125,150) 0%, rgb(190,95,125) 100%)",
-                            boxShadow: "0 12px 32px rgba(210,110,135,0.45), inset 0 1px 0 rgba(255,255,255,0.3)",
+                            background:
+                              "linear-gradient(135deg, rgb(225,125,150) 0%, rgb(190,95,125) 100%)",
+                            boxShadow:
+                              "0 12px 32px rgba(210,110,135,0.45), inset 0 1px 0 rgba(255,255,255,0.3)",
                           }}
                           whileTap={{
                             scale: 0.97,
-                            background: "linear-gradient(135deg, rgb(200,100,125) 0%, rgb(165,70,100) 100%)",
-                            boxShadow: "0 4px 16px rgba(210,110,135,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
+                            background:
+                              "linear-gradient(135deg, rgb(200,100,125) 0%, rgb(165,70,100) 100%)",
+                            boxShadow:
+                              "0 4px 16px rgba(210,110,135,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
                           }}
                           style={{
                             height: "56px",

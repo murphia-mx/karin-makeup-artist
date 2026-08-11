@@ -54,7 +54,7 @@ export default function Landing() {
     <main className="bg-brand-bg text-brand-text selection:bg-brand-accent/30 min-h-[100dvh]">
       <Navbar navbar={landing.navbar} />
       <Hero hero={landing.hero} />
-      <Services />
+      <Services services={landing.services.items} />
       <Gallery gallery={landing.gallery} />
       <ReviewsSection testimonials={landing.testimonials} />
       <CTA cta={landing.cta} />
