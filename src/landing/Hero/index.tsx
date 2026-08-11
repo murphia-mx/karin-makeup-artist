@@ -24,7 +24,7 @@ export default function Hero({ hero }: { hero?: any }) {
   const ctaAction = hero?.cta?.actionUrl || "#contacto";
   const rating = (hero?.rating ?? 5.0) as number;
   const reviewCount = (hero?.reviewCount ?? 0) as number;
-  const image = "public/images/hero/banner.png";
+  const image = "/images/hero/banner.png";
 
   return (
     <section

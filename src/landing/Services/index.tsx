@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 // Imágenes premium
 const SERVICE_IMAGES: Record<string, string> = {
-  novia: "public/images/portfolio/work3.jpeg",
+  novia: "/images/portfolio/work3.jpeg",
   xv: "https://images.unsplash.com/photo-1629814696209-4f4faf2ab874?q=85&w=1000&auto=format&fit=crop&crop=faces",
   social:
     "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=85&w=1000&auto=format&fit=crop",
