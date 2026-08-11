@@ -2,39 +2,28 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-// IMÁGENES DE ALTA CALIDAD EDITORIAL (Verticales, sneak peek)
-const FALLBACK_IMAGES = [
-  {
-    url: "public/images/portfolio/work1.jpeg",
-    category: "Maquillaje de Novia",
-    description: "Look natural glam",
-  },
-  {
-    url: "public/images/portfolio/work1.jpeg",
-    category: "Maquillaje Social",
-    description: "Evento nocturno",
-  },
-  {
-    url: "public/images/portfolio/work2.jpeg",
-    category: "Sesión Fotográfica",
-    description: "Acabado de alta definición",
-  },
-  {
-    url: "public/images/portfolio/work3.jpeg",
-    category: "XV Años",
-    description: "Brillo juvenil y frescura",
-  },
-  {
-    url: "public/images/portfolio/work4.jpeg",
-    category: "Graduación",
-    description: "Soft Glam elegante",
-  },
-  {
-    url: "public/images/portfolio/work5.jpeg",
-    category: "Maquillaje Editorial",
-    description: "Para cámaras HD",
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { supabaseAny as supabase } from '../../lib/supabase';
+
+// Hook para leer la galería
+const useLandingGallery = () => {
+  return useQuery({
+    queryKey: ['landing_gallery'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('gallery_projects')
+        .select('*')
+        .eq('active', true)
+        .eq('is_favorite', true)
+        .order('display_order', { ascending: true })
+        .limit(6);
+      
+      if (error) throw new Error(error.message);
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+};
 
 const LuxuryIcons = {
   sparkle: (
@@ -53,10 +42,11 @@ const LuxuryIcons = {
   ),
 };
 
-export default function Gallery({ gallery: model }: { gallery?: any }) {
-  const rawImages =
-    model?.images && model.images.length > 0 ? model.images : FALLBACK_IMAGES;
-  const displayImages = rawImages.slice(0, 6); // Limitar estrictamente a 6 fotos (Preview)
+export default function Gallery({}: { gallery?: any }) {
+  const { data: dbGallery } = useLandingGallery();
+  
+  // Usar los de BD si hay, sino fallback vacío para no romper la UI (o skeleton)
+  const displayImages = dbGallery && dbGallery.length > 0 ? dbGallery : [];
 
   return (
     <section
@@ -183,8 +173,8 @@ export default function Gallery({ gallery: model }: { gallery?: any }) {
                 className="block relative w-full h-full overflow-hidden bg-[#fff5f7] rounded-[15px]"
               >
                 <img
-                  src={img.url}
-                  alt={img.alt || img.category || "Maquillaje Karin"}
+                  src={img.image_url}
+                  alt={img.title || img.category || "Maquillaje Karin"}
                   className="w-full h-auto block"
                   loading={index < 3 ? "eager" : "lazy"}
                   decoding="async"

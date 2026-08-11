@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Check, X, MessageSquare, Star, ChevronDown, ChevronUp, AlertTriangle, Pencil, Save, Reply, Sparkles } from 'lucide-react';
+import { Check, X, MessageSquare, Star, Pencil, Save, Reply, Sparkles } from 'lucide-react';
 import type { Review } from '../../reviews/types/Review';
 import { REVIEW_STATUS } from '../../reviews/types/Review';
 import { useModeration } from '../hooks/useModeration';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface ModerationCardProps {
   review: Review;
@@ -58,26 +57,26 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
 
   return (
     <div className={clsx(
-      "bg-white rounded-[2rem] border transition-all duration-500 relative flex flex-col group",
-      review.featured ? "border-[#D9A05B]/30 shadow-[0_8px_40px_rgba(217,160,91,0.06)]" : "border-[#EBDDE2]/50 hover:border-[#EBDDE2] hover:shadow-[0_8px_30px_rgba(0,0,0,0.03)]"
+      "bg-admin-surface rounded-[2rem] border transition-all duration-500 relative flex flex-col group",
+      review.featured ? "border-admin-warning/30 shadow-[0_8px_40px_rgba(217,160,91,0.06)]" : "border-admin-neutral/40 hover:border-admin-neutral hover:shadow-[0_8px_30px_rgba(45,32,37,0.03)]"
     )}>
       
       {/* Featured Ribbon */}
       {review.featured && (
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#D9A05B]/80 to-transparent opacity-80" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-admin-warning/80 to-transparent opacity-80" />
       )}
 
       {/* Action Hover Header */}
       {!isEditing && (
-        <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 flex gap-2">
+        <div className="absolute top-6 right-6 transition-opacity duration-300 z-10 flex gap-2">
           {review.featured && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FAF7F7] text-[#D9A05B] rounded-full text-[10px] font-semibold tracking-widest uppercase border border-[#EBDDE2]/50">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-admin-surface-2 text-admin-warning rounded-full text-[10px] font-semibold tracking-widest uppercase border border-admin-neutral/40">
               <Star className="w-3 h-3 fill-current" /> Destacada
             </div>
           )}
           <button 
             onClick={() => setIsEditing(true)}
-            className="p-2 text-[#765E68] hover:text-[#301C27] bg-[#FAF7F7] hover:bg-[#F3E4E9]/50 rounded-full transition-colors border border-[#EBDDE2]/50"
+            className="p-2 text-admin-text-muted hover:text-admin-text bg-admin-surface-2 hover:bg-admin-accent-soft/50 rounded-full transition-colors border border-admin-neutral/40"
             title="Editar reseña"
           >
             <Pencil className="w-3.5 h-3.5" />
@@ -91,7 +90,7 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
           
           {/* Avatar Area */}
           <div className="shrink-0 flex flex-col items-center md:items-start gap-4">
-            <div className="w-16 h-16 rounded-full bg-[#FAF7F7] border border-[#EBDDE2]/50 flex items-center justify-center text-2xl font-display text-[#301C27] shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-admin-surface-2 border border-admin-neutral/40 flex items-center justify-center text-2xl font-bold text-admin-text shadow-sm">
               {review.client_name.charAt(0).toUpperCase()}
             </div>
             
@@ -102,12 +101,12 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
                     key={i} 
                     className={clsx(
                       "w-3.5 h-3.5",
-                      i < (isEditing ? editRating : review.rating) ? "text-[#301C27] fill-current" : "text-[#EBDDE2]"
+                      i < (isEditing ? editRating : review.rating) ? "text-admin-text fill-current" : "text-admin-neutral"
                     )} 
                   />
                 ))}
               </div>
-              <p className="text-[10px] font-semibold tracking-widest uppercase text-[#765E68]/60 mt-2">
+              <p className="text-[10px] font-semibold tracking-widest uppercase text-admin-text-muted/60 mt-2">
                 {format(new Date(review.created_at), "MMM yyyy", { locale: es })}
               </p>
             </div>
@@ -121,46 +120,46 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
                   type="text" 
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full text-lg font-display text-[#301C27] border-b border-[#EBDDE2] pb-2 focus:outline-none focus:border-[#CF7F9B] bg-transparent"
+                  className="w-full text-xl font-bold text-admin-text border-b border-admin-neutral pb-2 focus:outline-none focus:border-admin-accent-dark bg-transparent"
                   placeholder="Nombre del cliente"
                 />
                 
                 <textarea
                   value={editReviewText}
                   onChange={(e) => setEditReviewText(e.target.value)}
-                  className="w-full min-h-[140px] p-4 text-[#301C27] text-[15px] font-light border border-[#EBDDE2] rounded-2xl focus:outline-none focus:border-[#CF7F9B] resize-none bg-[#FAF7F7] leading-relaxed"
+                  className="w-full min-h-[140px] p-4 text-admin-text text-[15px] font-light border border-admin-neutral rounded-2xl focus:outline-none focus:border-admin-accent-dark resize-none bg-admin-surface-2 leading-relaxed"
                   placeholder="Escribe la reseña..."
                 />
                 
                 <div className="flex justify-end gap-3 pt-2">
                   <button 
                     onClick={handleCancelEdit}
-                    className="px-5 py-2.5 text-[13px] font-medium text-[#765E68] hover:bg-[#FAF7F7] rounded-xl transition-colors"
+                    className="px-5 py-2.5 text-[13px] font-medium text-admin-text-muted hover:bg-admin-surface-2 rounded-xl transition-colors"
                   >
                     Cancelar
                   </button>
                   <button 
                     onClick={handleSaveEdit}
                     disabled={edit.isPending}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-[#301C27] text-white text-[13px] font-medium rounded-xl hover:bg-[#CF7F9B] transition-colors disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-2.5 bg-admin-text text-admin-bg text-[13px] font-medium rounded-xl hover:bg-admin-accent-dark transition-colors disabled:opacity-50"
                   >
-                    <Save className="w-4 h-4" /> Guardar
+                    <Save className="w-4 h-4" strokeWidth={1.5} /> Guardar
                   </button>
                 </div>
               </div>
             ) : (
               <div className="max-w-3xl">
-                <div className="flex items-center gap-3 mb-4">
-                  <h3 className="text-xl font-display font-medium text-[#301C27]">{review.client_name}</h3>
-                  {review.is_verified && (
-                    <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-[#765E68] bg-[#FAF7F7] px-2 py-1 rounded-full border border-[#EBDDE2]/50">
-                      <Check className="w-3 h-3 text-[#CF7F9B]" /> Verificada
+                <div className="flex items-center gap-4 mb-4">
+                  <h3 className="text-2xl font-bold text-admin-text">{review.client_name}</h3>
+                  {review.verified && (
+                    <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest text-admin-text-muted bg-admin-surface-2 px-3 py-1.5 rounded-full border border-admin-neutral/40">
+                      <Check className="w-3.5 h-3.5 text-admin-success" strokeWidth={2} /> Verificada
                     </span>
                   )}
                 </div>
                 
                 <p className={clsx(
-                  "text-[#301C27] font-light leading-relaxed whitespace-pre-wrap text-[17px] md:text-[19px] tracking-tight",
+                  "text-admin-text font-light leading-relaxed whitespace-pre-wrap text-[17px] md:text-[19px] tracking-tight",
                   !isExpanded && "line-clamp-4"
                 )}>
                   "{review.review_text}"
@@ -169,7 +168,7 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
                 {review.review_text.length > 200 && (
                   <button 
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-4 text-[11px] uppercase tracking-widest font-semibold text-[#CF7F9B] hover:text-[#301C27] transition-colors flex items-center gap-1"
+                    className="mt-5 text-[11px] uppercase tracking-widest font-bold text-admin-accent-dark hover:text-admin-text transition-colors flex items-center gap-1"
                   >
                     {isExpanded ? 'Leer Menos' : 'Leer Completa'}
                   </button>
@@ -185,7 +184,7 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
                     key={media.id} 
                     src={media.url} 
                     alt="Review attached" 
-                    className="w-32 h-32 object-cover rounded-2xl border border-[#EBDDE2]/50 shadow-sm hover:scale-105 transition-transform duration-500 cursor-zoom-in"
+                    className="w-32 h-32 object-cover rounded-2xl border border-admin-neutral/40 shadow-sm hover:scale-105 transition-transform duration-500 cursor-zoom-in"
                   />
                 ))}
               </div>
@@ -193,18 +192,18 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
 
             {/* AI Analysis (Collapsible) */}
             {!isEditing && review.ai_review_analysis && (
-              <div className="mt-8 border-t border-[#EBDDE2]/30 pt-6">
-                <div className="flex items-center gap-6">
+              <div className="mt-8 border-t border-admin-neutral/40 pt-6">
+                <div className="flex items-center gap-8">
                   <div className="flex flex-col">
-                    <span className="text-[9px] uppercase tracking-widest font-semibold text-[#765E68]/50 mb-1 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3" /> IA Sentimiento
+                    <span className="text-[10px] uppercase tracking-[0.15em] font-bold text-admin-text-muted mb-2 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" strokeWidth={1.5} /> IA Sentimiento
                     </span>
-                    <span className="text-sm font-medium text-[#301C27] capitalize">{review.ai_review_analysis.sentiment || 'N/A'}</span>
+                    <span className="text-sm font-medium text-admin-text capitalize">{review.ai_review_analysis.sentiment || 'N/A'}</span>
                   </div>
-                  <div className="w-px h-8 bg-[#EBDDE2]/50" />
+                  <div className="w-px h-10 bg-admin-neutral/40" />
                   <div className="flex flex-col">
-                    <span className="text-[9px] uppercase tracking-widest font-semibold text-[#765E68]/50 mb-1">Tópicos Clave</span>
-                    <span className="text-sm font-light text-[#301C27]">{review.ai_review_analysis.topics?.join(', ') || 'N/A'}</span>
+                    <span className="text-[10px] uppercase tracking-[0.15em] font-bold text-admin-text-muted mb-2">Tópicos Clave</span>
+                    <span className="text-sm font-light text-admin-text">{review.ai_review_analysis.topics?.join(', ') || 'N/A'}</span>
                   </div>
                 </div>
               </div>
@@ -212,21 +211,21 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
 
             {/* Admin Reply Section */}
             {!isEditing && (review.admin_reply || isReplying) && (
-              <div className="mt-10 bg-[#FAF7F7] rounded-[1.5rem] p-6 md:p-8 border border-[#EBDDE2]/50 relative group">
-                <div className="flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-[#301C27] flex items-center justify-center shrink-0 shadow-md">
-                    <span className="text-xs font-bold text-white">K</span>
+              <div className="mt-10 bg-admin-surface-2/50 rounded-[1.5rem] p-6 md:p-8 border border-admin-neutral/40 relative group">
+                <div className="flex gap-5">
+                  <div className="w-10 h-10 rounded-full bg-admin-text flex items-center justify-center shrink-0 shadow-md">
+                    <span className="text-sm font-bold text-admin-bg">K</span>
                   </div>
                   <div className="flex-1">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="text-sm font-medium text-[#301C27]">Karin Makeup Artist</span>
+                    <div className="flex justify-between items-center mb-4">
+                      <span className="text-[15px] font-bold tracking-wide text-admin-text">Karin Makeup Artist</span>
                       {review.admin_reply && !isReplying && (
                         <button 
                           onClick={() => {
                             setReplyText(review.admin_reply || '');
                             setIsReplying(true);
                           }}
-                          className="opacity-0 group-hover:opacity-100 text-[#765E68] hover:text-[#CF7F9B] transition-all text-xs font-medium"
+                          className="text-admin-text-muted hover:text-admin-accent-dark transition-all text-xs font-medium uppercase tracking-widest"
                         >
                           Editar respuesta
                         </button>
@@ -234,12 +233,12 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
                     </div>
                     
                     {isReplying ? (
-                      <div className="space-y-4">
+                      <div className="space-y-5">
                         <textarea
                           value={replyText}
                           onChange={(e) => setReplyText(e.target.value)}
                           placeholder="Escribe tu respuesta pública..."
-                          className="w-full min-h-[100px] p-4 text-[15px] font-light text-[#301C27] border border-[#EBDDE2] rounded-2xl focus:outline-none focus:border-[#CF7F9B] resize-none bg-white leading-relaxed"
+                          className="w-full min-h-[100px] p-5 text-[15px] font-light text-admin-text border border-admin-neutral/50 rounded-2xl focus:outline-none focus:border-admin-accent-dark resize-none bg-admin-surface leading-relaxed"
                           autoFocus
                         />
                         <div className="flex justify-end gap-3">
@@ -248,22 +247,22 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
                               setIsReplying(false);
                               setReplyText(review.admin_reply || '');
                             }}
-                            className="px-5 py-2 text-[13px] font-medium text-[#765E68] hover:text-[#301C27] transition-colors"
+                            className="px-6 py-2.5 text-[13px] font-medium text-admin-text-muted hover:text-admin-text transition-colors"
                           >
                             Cancelar
                           </button>
                           <button 
                             onClick={handleReplySubmit}
                             disabled={reply.isPending || !replyText.trim()}
-                            className="px-6 py-2 bg-[#301C27] text-white text-[13px] font-medium rounded-xl hover:bg-[#CF7F9B] transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
+                            className="px-7 py-2.5 bg-admin-text text-admin-bg text-[13px] font-medium rounded-[1rem] hover:bg-admin-accent-dark transition-colors shadow-sm disabled:opacity-50 flex items-center gap-2"
                           >
-                            <Reply className="w-4 h-4" />
+                            <Reply className="w-4 h-4" strokeWidth={1.5} />
                             {review.admin_reply ? 'Actualizar' : 'Responder'}
                           </button>
                         </div>
                       </div>
                     ) : (
-                      <p className="text-[15px] text-[#765E68] font-light leading-relaxed whitespace-pre-wrap">
+                      <p className="text-[15px] text-admin-text-muted font-light leading-relaxed whitespace-pre-wrap">
                         {review.admin_reply}
                       </p>
                     )}
@@ -277,42 +276,42 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
 
       {/* Contextual Footer Toolbar */}
       {!isEditing && (
-        <div className="px-8 py-5 border-t border-[#EBDDE2]/30 flex flex-col sm:flex-row justify-between items-center gap-6 bg-[#FAF7F7]/50 rounded-b-[2rem]">
+        <div className="px-5 py-5 sm:px-8 sm:py-6 border-t border-admin-neutral/40 flex flex-col sm:flex-row justify-between items-center gap-5 sm:gap-6 bg-admin-surface-2/30 rounded-b-[2rem]">
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-full sm:w-auto gap-3">
             {isPending && (
-              <span className="text-[10px] uppercase tracking-widest font-semibold text-[#CF7F9B] flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#CF7F9B] animate-pulse" /> Requiere revisión
+              <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-admin-accent-dark flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-admin-accent-dark animate-pulse" /> Requiere revisión
               </span>
             )}
             {isApproved && (
-              <span className="text-[10px] uppercase tracking-widest font-semibold text-[#301C27] flex items-center gap-1.5">
-                <Check className="w-3 h-3 text-[#301C27]" /> Publicada
+              <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-admin-text flex items-center gap-2">
+                <Check className="w-3.5 h-3.5 text-admin-text" strokeWidth={2} /> Publicada
               </span>
             )}
             {review.status === REVIEW_STATUS.REJECTED && (
-              <span className="text-[10px] uppercase tracking-widest font-semibold text-[#765E68] flex items-center gap-1.5">
-                <X className="w-3 h-3 text-[#765E68]" /> Oculta
+              <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-admin-text-muted flex items-center gap-2">
+                <X className="w-3.5 h-3.5 text-admin-text-muted" strokeWidth={2} /> Oculta
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center w-full sm:w-auto gap-3 sm:gap-4">
             {isPending && (
               <>
                 <button 
                   onClick={() => handleReject()}
                   disabled={reject.isPending}
-                  className="px-5 py-2.5 text-[#765E68] hover:text-[#301C27] text-[13px] font-medium rounded-xl hover:bg-[#EBDDE2]/30 transition-colors disabled:opacity-50"
+                  className="w-full sm:w-auto px-6 py-3.5 sm:py-3 min-h-[48px] sm:min-h-[44px] text-admin-text-muted hover:text-admin-text text-[13px] font-medium rounded-xl hover:bg-admin-neutral/30 transition-colors disabled:opacity-50 flex items-center justify-center"
                 >
                   Ocultar
                 </button>
                 <button 
                   onClick={() => handleApprove()}
                   disabled={approve.isPending}
-                  className="px-6 py-2.5 bg-[#301C27] text-white text-[13px] font-medium rounded-xl hover:bg-[#CF7F9B] transition-colors disabled:opacity-50 flex items-center gap-2 shadow-[0_4px_12px_rgba(48,28,39,0.1)] hover:shadow-[0_4px_12px_rgba(207,127,155,0.2)]"
+                  className="w-full sm:w-auto px-7 py-3.5 sm:py-3 min-h-[48px] sm:min-h-[44px] bg-admin-text text-admin-bg text-[13px] font-medium rounded-[1.25rem] hover:bg-admin-accent-dark transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(45,32,37,0.1)] hover:shadow-[0_4px_16px_rgba(45,32,37,0.15)]"
                 >
-                  <Check className="w-4 h-4" /> Aprobar y Publicar
+                  <Check className="w-4 h-4" strokeWidth={1.5} /> Aprobar y Publicar
                 </button>
               </>
             )}
@@ -322,22 +321,22 @@ export const ModerationCard = ({ review }: ModerationCardProps) => {
                 {!review.admin_reply && !isReplying && (
                   <button 
                     onClick={() => setIsReplying(true)}
-                    className="px-5 py-2.5 text-[#765E68] hover:text-[#301C27] bg-white border border-[#EBDDE2]/50 hover:border-[#EBDDE2] rounded-xl transition-all flex items-center gap-2 text-[13px] font-medium shadow-sm"
+                    className="w-full sm:w-auto px-6 py-3.5 sm:py-3 min-h-[48px] sm:min-h-[44px] text-admin-text-muted hover:text-admin-text bg-admin-surface border border-admin-neutral/40 hover:border-admin-neutral rounded-[1.25rem] transition-all flex items-center justify-center gap-2 text-[13px] font-medium shadow-sm"
                   >
-                    <MessageSquare className="w-4 h-4" /> Escribir respuesta
+                    <MessageSquare className="w-4 h-4" strokeWidth={1.5} /> Escribir respuesta
                   </button>
                 )}
                 <button 
                   onClick={handleFeatureToggle}
                   disabled={toggleFeatured.isPending}
                   className={clsx(
-                    "px-5 py-2.5 rounded-xl border transition-all flex items-center gap-2 text-[13px] font-medium",
+                    "w-full sm:w-auto px-6 py-3.5 sm:py-3 min-h-[48px] sm:min-h-[44px] rounded-[1.25rem] border transition-all flex items-center justify-center gap-2 text-[13px] font-medium",
                     review.featured 
-                      ? "bg-[#FAF7F7] text-[#D9A05B] border-[#D9A05B]/30 hover:bg-white" 
-                      : "bg-white text-[#765E68] hover:text-[#301C27] border-[#EBDDE2]/50 hover:border-[#EBDDE2] shadow-sm"
+                      ? "bg-admin-surface-2 text-admin-warning border-admin-warning/30 hover:bg-admin-surface" 
+                      : "bg-admin-surface text-admin-text-muted hover:text-admin-text border-admin-neutral/40 hover:border-admin-neutral shadow-sm"
                   )}
                 >
-                  <Star className={clsx("w-4 h-4", review.featured && "fill-current")} /> 
+                  <Star className={clsx("w-4 h-4", review.featured && "fill-current")} strokeWidth={1.5} /> 
                   {review.featured ? 'Quitar destacada' : 'Hacer destacada'}
                 </button>
               </>

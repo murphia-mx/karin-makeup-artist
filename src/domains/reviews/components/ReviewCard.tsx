@@ -34,16 +34,16 @@ export const ReviewCard = ({ review, index, isFeatured }: ReviewCardProps) => {
     }
   }, [review.review_text]);
 
-  const animationProps = isFeatured
+  const animationProps: any = isFeatured
     ? {
         initial: { opacity: 0, y: 15, scale: 0.98 },
         whileInView: { opacity: 1, y: 0, scale: 1 },
-        transition: { duration: 0.6, delay: (index % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }
+        transition: { duration: 0.6, delay: (index % 3) * 0.1, ease: "easeOut" }
       }
     : {
         initial: { opacity: 0, y: 12 },
         whileInView: { opacity: 1, y: 0 },
-        transition: { duration: 0.5, delay: (index % 3) * 0.1, ease: [0.22, 1, 0.36, 1] }
+        transition: { duration: 0.5, delay: (index % 3) * 0.1, ease: "easeOut" }
       };
 
   return (

@@ -112,7 +112,6 @@ export type Database = {
           client_email?: string | null
           service_id?: string
           service_date?: string | null
-          service_id?: string
           used?: boolean
           expires_at?: string
           created_at?: string

@@ -17,7 +17,8 @@ export class InvitationService {
     try {
       const expiresAt = addDays(new Date(), 30).toISOString();
 
-      const { data, error } = await supabase
+      const supabaseAny = supabase as any;
+      const { data, error } = await supabaseAny
         .from('review_invitations')
         .insert({ 
           client_name: payload.clientName,
@@ -52,7 +53,8 @@ export class InvitationService {
     const logContext = { domain: 'INVITATIONS' as const, action: 'getInvitations' };
     
     try {
-      const { data, error } = await supabase
+      const supabaseAny = supabase as any;
+      const { data, error } = await supabaseAny
         .from('review_invitations')
         .select(`
           *,
@@ -62,7 +64,7 @@ export class InvitationService {
 
       if (error) throw error;
 
-      return data.map((inv) => ({
+      return data.map((inv: any) => ({
         ...inv,
         service_name: inv.services?.name
       })) as Invitation[];
@@ -83,7 +85,8 @@ export class InvitationService {
     const logContext = { domain: 'INVITATIONS' as const, action: 'validateToken' };
     
     try {
-      const { data, error } = await supabase.rpc('validate_review_invitation', {
+      const supabaseAny = supabase as any;
+      const { data, error } = await supabaseAny.rpc('validate_review_invitation', {
         token_id: tokenId
       });
 

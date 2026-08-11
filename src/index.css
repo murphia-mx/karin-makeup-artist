@@ -4,6 +4,29 @@
 @theme {
   --font-sans: "Inter", system-ui, sans-serif;
   --font-display: "Cormorant Garamond", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+
+  /* ADMIN PREMIUM FONTS (ISOLATED) */
+  --font-admin-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+  /* ADMIN PREMIUM COLORS (ISOLATED) */
+  --color-admin-bg: #FFF8F6; /* CREMA */
+  --color-admin-surface: #FFFFFF; /* BLANCO */
+  --color-admin-surface-2: #FCEAF1; /* ROSA SUAVE */
+  --color-admin-surface-3: #F7D6E2; /* BLUSH */
+  
+  --color-admin-text: #351923; /* PLUM */
+  --color-admin-text-muted: #806F77; /* Subtle text */
+  
+  --color-admin-accent: #D95F86; /* ROSA KARIN */
+  --color-admin-accent-dark: #B83265; /* MAGENTA / BERRY */
+  --color-admin-accent-light: #E54878; /* ROSA INTENSO */
+  --color-admin-accent-soft: #F7D6E2; /* BLUSH */
+  
+  --color-admin-border: #F7D6E2; /* BLUSH for borders */
+  
+  --color-admin-success: #1E6C53; /* Verde elegante */
+  --color-admin-warning: #B38600; /* Amarillo/dorado elegante */
+  --color-admin-error: #B83265; /* Berry / Rosa fuerte */
 }
 
 @tailwind base;

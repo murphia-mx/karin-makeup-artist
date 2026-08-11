@@ -68,6 +68,9 @@ export interface ServiceExtended {
   show_in_landing: boolean;
   accepts_bookings: boolean;
   category: string;
+  landing_title_top?: string | null;
+  landing_title_bottom?: string | null;
+  features?: any[] | null;
   created_at: string;
   updated_at: string;
   // Stats (calculados desde reviews)

@@ -20,10 +20,10 @@ export const ModerationHeader = ({ currentTab, onTabChange, searchQuery, onSearc
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12">
+    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-12 font-admin-sans">
       
-      {/* iOS Segmented Control */}
-      <div className="flex p-1 bg-[#EBDDE2]/40 rounded-[1.25rem] w-full lg:w-auto overflow-x-auto hide-scrollbar">
+      {/* Segmented Control */}
+      <div className="flex p-1.5 bg-admin-surface-2/60 rounded-[1.25rem] w-full lg:w-auto overflow-x-auto hide-scrollbar border border-admin-neutral/40">
         {tabs.map((tab) => {
           const isActive = currentTab === tab.value;
           return (
@@ -31,14 +31,14 @@ export const ModerationHeader = ({ currentTab, onTabChange, searchQuery, onSearc
               key={tab.value}
               onClick={() => onTabChange(tab.value)}
               className={clsx(
-                "relative px-6 py-2.5 rounded-2xl text-[13px] font-medium transition-colors duration-300 whitespace-nowrap",
-                isActive ? "text-[#301C27]" : "text-[#765E68] hover:text-[#301C27]"
+                "relative px-6 py-2.5 rounded-[1rem] text-[13px] font-medium transition-colors duration-300 whitespace-nowrap tracking-wide shrink-0",
+                isActive ? "text-admin-text" : "text-admin-text-muted hover:text-admin-text"
               )}
             >
               {isActive && (
                 <motion.div
                   layoutId="activeTabModeration"
-                  className="absolute inset-0 bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                  className="absolute inset-0 bg-admin-surface rounded-[1rem] shadow-[0_2px_10px_rgba(45,32,37,0.04)] border border-admin-neutral/40"
                   initial={false}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
                 />
@@ -51,15 +51,15 @@ export const ModerationHeader = ({ currentTab, onTabChange, searchQuery, onSearc
 
       {/* Search Input */}
       <div className="relative w-full lg:w-80 group">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <Search className="h-4 w-4 text-[#765E68]/60 group-focus-within:text-[#CF7F9B] transition-colors" />
+        <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+          <Search className="h-4 w-4 text-admin-text-muted/60 group-focus-within:text-admin-accent-dark transition-colors" strokeWidth={1.5} />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Buscar reseña o clienta..."
-          className="w-full pl-11 pr-4 py-3 rounded-[1.25rem] border border-[#EBDDE2]/50 bg-white text-[13px] font-light text-[#301C27] focus:outline-none focus:border-[#EBDDE2] focus:shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all placeholder-[#765E68]/50"
+          className="w-full pl-12 pr-5 py-3.5 rounded-2xl border border-admin-neutral/40 bg-admin-surface text-[14px] font-light text-admin-text focus:outline-none focus:border-admin-neutral focus:shadow-[0_4px_20px_rgba(45,32,37,0.03)] transition-all placeholder-admin-text-muted/50"
         />
       </div>
     </div>

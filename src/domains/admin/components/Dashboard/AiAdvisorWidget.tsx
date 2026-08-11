@@ -39,14 +39,6 @@ const renderIcon = (type: string) => {
   }
 };
 
-const renderPriority = (priority: string) => {
-  switch (priority) {
-    case 'low': return 'Observación';
-    case 'medium': return 'Recomendación';
-    case 'high': return 'Prioridad';
-    default: return 'Insight';
-  }
-};
 
 export const AiAdvisorWidget = () => {
   const { data: report, isLoading, refetch } = useAiAdvisor();
@@ -146,7 +138,7 @@ export const AiAdvisorWidget = () => {
                       loadingStepIndex === LOADING_STEPS.length - 1 ? 'text-[#301C27]' : 'text-[#CF7F9B] animate-pulse'
                     )} />
                   </div>
-                  <h3 className="text-xl font-display font-medium text-[#301C27] tracking-wide">{currentStep.text}</h3>
+                  <h3 className="text-xl font-medium text-[#301C27] tracking-wide">{currentStep.text}</h3>
                 </motion.div>
               );
             })()}
@@ -165,7 +157,7 @@ export const AiAdvisorWidget = () => {
             <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-sm border border-[#EBDDE2]">
               <Sparkles className="w-6 h-6 text-[#CF7F9B]" />
             </div>
-            <h3 className="text-2xl font-display font-medium text-[#301C27] mb-3">
+            <h3 className="text-2xl font-medium text-[#301C27] mb-3">
               Conociendo a tus clientas
             </h3>
             <p className="text-[#765E68] text-sm max-w-md mx-auto font-light leading-relaxed mb-8">
@@ -204,7 +196,7 @@ export const AiAdvisorWidget = () => {
             <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center mb-6 shadow-sm border border-[#EBDDE2]">
               <Sparkles className="w-6 h-6 text-[#CF7F9B]" />
             </div>
-            <h3 className="text-2xl font-display font-medium text-[#301C27] mb-3">
+            <h3 className="text-2xl font-medium text-[#301C27] mb-3">
               Todo listo para el primer análisis
             </h3>
             <p className="text-[#765E68] text-sm max-w-md mx-auto font-light leading-relaxed mb-8">
@@ -225,7 +217,7 @@ export const AiAdvisorWidget = () => {
           <motion.div key="stateD" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-12">
             <div className="bg-[#FAF7F7] border border-[#EBDDE2]/50 rounded-[2rem] p-8 flex flex-col md:flex-row md:items-center justify-between gap-8">
               <div>
-                <h4 className="text-lg font-display text-[#301C27] mb-2">Hay nuevas opiniones disponibles</h4>
+                <h4 className="text-lg text-[#301C27] mb-2 font-medium">Hay nuevas opiniones disponibles</h4>
                 <p className="text-[#765E68] font-light text-sm max-w-xl leading-relaxed">
                   Actualiza el análisis para obtener insights cualitativos precisos basados en las últimas reseñas que has recibido hoy.
                 </p>
@@ -247,7 +239,7 @@ export const AiAdvisorWidget = () => {
             
             {/* HERO INSIGHT */}
             <div className="mb-12">
-              <h3 className="text-3xl md:text-4xl font-display font-light text-[#301C27] leading-tight mb-8">
+              <h3 className="text-3xl md:text-4xl font-light text-[#301C27] leading-tight mb-8 tracking-tight">
                 {payload?.hero_greeting}
               </h3>
               

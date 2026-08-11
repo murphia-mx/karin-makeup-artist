@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, MessageCircleHeart, Sparkles } from 'lucide-react';
+import { Plus, MessageCircleHeart } from 'lucide-react';
 import { ReviewList } from './ReviewList';
 import { ReviewStepper } from './ReviewStepper/ReviewStepper';
 // import { EmptyState } from '../../../components/ui/States/EmptyState'; // Assuming we handle empty states here or ignore if they aren't needed, but user wants them.

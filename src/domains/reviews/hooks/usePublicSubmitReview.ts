@@ -16,7 +16,8 @@ export const usePublicSubmitReview = () => {
   return useMutation({
     mutationFn: async (data: PublicSubmitData) => {
       // 1. Llamar a la operación atómica y segura
-      const { data: reviewId, error } = await supabase.rpc('submit_review_for_invitation', {
+      const supabaseAny = supabase as any;
+      const { data: reviewId, error } = await supabaseAny.rpc('submit_review_for_invitation', {
         token_id: data.invitation_id,
         p_rating: data.rating,
         p_content: data.review_text

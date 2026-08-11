@@ -6,4 +6,4 @@ ALTER TABLE review_invitations
 -- 2. Agregamos la columna service_date
 -- Guardará exclusivamente la fecha del servicio, sin afectar las fechas de creación o expiración.
 ALTER TABLE review_invitations
-  ADD COLUMN service_date DATE;
+  ADD COLUMN IF NOT EXISTS service_date DATE;

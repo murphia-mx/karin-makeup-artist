@@ -71,21 +71,21 @@ export const InvitationList = ({ invitations, onOpenDetails }: InvitationListPro
         return (
           <div 
             key={inv.id} 
-            className="group flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-white rounded-2xl border border-[#EBDDE2]/50 hover:border-[#EBDDE2] hover:shadow-[0_4px_20px_rgba(0,0,0,0.02)] transition-all duration-300 gap-4 relative"
+            className="group flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-admin-surface rounded-2xl border border-admin-neutral/40 hover:border-admin-neutral hover:shadow-[0_4px_20px_rgba(45,32,37,0.03)] transition-all duration-300 gap-4 relative"
           >
             <div className="flex items-center gap-5">
-              <div className="w-12 h-12 rounded-full bg-[#FAF7F7] border border-[#EBDDE2]/50 flex items-center justify-center text-lg font-display text-[#301C27] shrink-0">
+              <div className="w-12 h-12 rounded-full bg-admin-surface-2 border border-admin-neutral/40 flex items-center justify-center text-lg font-bold text-admin-text shrink-0">
                 {inv.client_name.charAt(0).toUpperCase()}
               </div>
               
               <div>
-                <h4 className="text-[15px] font-medium text-[#301C27]">{inv.client_name}</h4>
-                <div className="flex flex-wrap items-center gap-2 mt-1">
-                  <span className="text-[13px] font-light text-[#765E68]">
+                <h4 className="text-[16px] font-medium text-admin-text tracking-wide">{inv.client_name}</h4>
+                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                  <span className="text-[14px] font-light text-admin-text-muted">
                     {inv.service_name || 'Servicio General'}
                   </span>
-                  <span className="w-1 h-1 rounded-full bg-[#EBDDE2]" />
-                  <span className="text-[13px] font-light text-[#765E68]">
+                  <span className="w-1 h-1 rounded-full bg-admin-neutral" />
+                  <span className="text-[14px] font-light text-admin-text-muted">
                     {inv.service_date 
                       ? format(new Date(inv.service_date), "d MMM yyyy", { locale: es })
                       : format(new Date(inv.created_at), "d MMM yyyy", { locale: es })}
@@ -94,60 +94,97 @@ export const InvitationList = ({ invitations, onOpenDetails }: InvitationListPro
               </div>
             </div>
 
-            <div className="flex items-center gap-4 sm:ml-auto">
-              {isUsed ? (
-                <span className="flex items-center gap-1.5 px-3 py-1 bg-[#FAF7F7] text-[#301C27] border border-[#EBDDE2]/50 rounded-full text-[10px] font-semibold tracking-widest uppercase">
-                  <Check className="w-3 h-3" /> Reseña recibida
-                </span>
-              ) : (
-                <span className="flex items-center gap-1.5 px-3 py-1 bg-[#F3E4E9]/30 text-[#CF7F9B] border border-[#CF7F9B]/20 rounded-full text-[10px] font-semibold tracking-widest uppercase">
-                  <Clock className="w-3 h-3" /> Pendiente
-                </span>
-              )}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-0 border-admin-neutral/40 w-full sm:w-auto">
+              <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto">
+                {isUsed ? (
+                  <span className="flex items-center justify-center gap-2 px-3 py-1.5 bg-admin-surface-2 text-admin-text border border-admin-neutral/40 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase flex-1 sm:flex-none">
+                    <Check className="w-3.5 h-3.5" strokeWidth={2} /> Reseña recibida
+                  </span>
+                ) : (
+                  <span className="flex items-center justify-center gap-2 px-3 py-1.5 bg-admin-accent-soft/30 text-admin-accent-dark border border-admin-accent-soft/50 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase flex-1 sm:flex-none">
+                    <Clock className="w-3.5 h-3.5" strokeWidth={2} /> Pendiente
+                  </span>
+                )}
+              </div>
               
-              <div className="relative">
+              {/* Desktop Dropdown / Mobile Action Row */}
+              <div className="hidden sm:block relative">
                 <button 
                   onClick={() => setOpenMenuId(openMenuId === inv.id ? null : inv.id)}
-                  className="p-2 text-[#765E68] hover:text-[#301C27] hover:bg-[#FAF7F7] rounded-full transition-colors"
+                  className="p-2 text-admin-text-muted hover:text-admin-text hover:bg-admin-surface-2 rounded-full transition-colors active:scale-95"
                 >
-                  <MoreHorizontal className="w-4 h-4" />
+                  <MoreHorizontal className="w-5 h-5" strokeWidth={1.5} />
                 </button>
 
                 {openMenuId === inv.id && (
                   <div 
                     ref={menuRef}
-                    className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] border border-[#EBDDE2]/50 py-1 z-10"
+                    className="absolute right-0 top-full mt-2 w-52 bg-admin-surface rounded-2xl shadow-[0_8px_30px_rgba(45,32,37,0.12)] border border-admin-neutral/50 py-1.5 z-10"
                   >
                     <button
                       onClick={() => {
                         onOpenDetails(inv);
                         setOpenMenuId(null);
                       }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#301C27] hover:bg-[#FAF7F7] transition-colors"
+                      className="w-full flex items-center gap-3 px-5 py-2.5 text-[14px] font-medium text-admin-text hover:bg-admin-surface-2 transition-colors"
                     >
-                      <Eye className="w-4 h-4 text-[#CF7F9B]" /> Ver invitación
+                      <Eye className="w-4 h-4 text-admin-accent-dark" strokeWidth={1.5} /> Ver invitación
                     </button>
                     <button
                       onClick={() => handleCopyLink(inv)}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#301C27] hover:bg-[#FAF7F7] transition-colors"
+                      className="w-full flex items-center gap-3 px-5 py-2.5 text-[14px] font-medium text-admin-text hover:bg-admin-surface-2 transition-colors"
                     >
-                      <Link className="w-4 h-4 text-[#CF7F9B]" /> Copiar enlace
+                      <Link className="w-4 h-4 text-admin-accent-dark" strokeWidth={1.5} /> Copiar enlace
                     </button>
                     <button
                       onClick={() => handleCopyMessage(inv)}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#301C27] hover:bg-[#FAF7F7] transition-colors"
+                      className="w-full flex items-center gap-3 px-5 py-2.5 text-[14px] font-medium text-admin-text hover:bg-admin-surface-2 transition-colors"
                     >
-                      <MessageCircle className="w-4 h-4 text-[#CF7F9B]" /> Copiar mensaje
+                      <MessageCircle className="w-4 h-4 text-admin-accent-dark" strokeWidth={1.5} /> Copiar mensaje
                     </button>
-                    {navigator.share && (
+                    {typeof navigator.share === 'function' && (
                       <button
                         onClick={() => handleShare(inv)}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-[#301C27] hover:bg-[#FAF7F7] transition-colors"
+                        className="w-full flex items-center gap-3 px-5 py-2.5 text-[14px] font-medium text-admin-text hover:bg-admin-surface-2 transition-colors"
                       >
-                        <Share className="w-4 h-4 text-[#CF7F9B]" /> Compartir
+                        <Share className="w-4 h-4 text-admin-accent-dark" strokeWidth={1.5} /> Compartir
                       </button>
                     )}
                   </div>
+                )}
+              </div>
+
+              {/* Mobile Always-Visible Actions */}
+              <div className="flex sm:hidden items-center justify-between gap-2 mt-2">
+                <button
+                  onClick={() => onOpenDetails(inv)}
+                  className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 rounded-xl bg-admin-surface-2 border border-admin-neutral/40 hover:bg-admin-neutral/20 text-admin-text transition-colors active:scale-95 py-2 gap-1"
+                >
+                  <Eye className="w-4 h-4" strokeWidth={2} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-admin-text-muted">Ver</span>
+                </button>
+                <button
+                  onClick={() => handleCopyLink(inv)}
+                  className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 rounded-xl bg-admin-surface-2 border border-admin-neutral/40 hover:bg-admin-neutral/20 text-admin-text transition-colors active:scale-95 py-2 gap-1"
+                >
+                  <Link className="w-4 h-4" strokeWidth={2} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-admin-text-muted">Enlace</span>
+                </button>
+                <button
+                  onClick={() => handleCopyMessage(inv)}
+                  className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 rounded-xl bg-admin-surface-2 border border-admin-neutral/40 hover:bg-admin-neutral/20 text-admin-text transition-colors active:scale-95 py-2 gap-1"
+                >
+                  <MessageCircle className="w-4 h-4" strokeWidth={2} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-admin-text-muted">Msj</span>
+                </button>
+                {typeof navigator.share === 'function' && (
+                  <button
+                    onClick={() => handleShare(inv)}
+                    className="flex flex-col items-center justify-center min-w-[44px] min-h-[44px] flex-1 rounded-xl bg-admin-surface-2 border border-admin-neutral/40 hover:bg-admin-neutral/20 text-admin-text transition-colors active:scale-95 py-2 gap-1"
+                  >
+                    <Share className="w-4 h-4" strokeWidth={2} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-admin-text-muted">Comp</span>
+                  </button>
                 )}
               </div>
             </div>

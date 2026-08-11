@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Send } from 'lucide-react';
 import { InvitationList } from '../components/InvitationList';
 import { InvitationDetailsModal } from '../components/InvitationDetailsModal';
 import { CreateInvitationModal } from '../components/CreateInvitationModal';
@@ -29,7 +29,7 @@ export const InvitationsView = () => {
       setCreateError(null);
       const response = await createMutation.mutateAsync(payload);
       
-      const serviceName = services?.find(s => s.id === payload.serviceId)?.name || 'Servicio';
+      const serviceName = (services as any[])?.find((s: any) => s.id === payload.serviceId)?.name || 'Servicio';
       
       setSelectedInvitation({
         id: response.id,
@@ -58,13 +58,13 @@ export const InvitationsView = () => {
   };
 
   return (
-    <div className="p-8 max-w-[1200px] mx-auto min-h-[calc(100vh-80px)]">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+    <div className="max-w-5xl mx-auto font-admin-sans">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
         <div>
-          <h1 className="text-[32px] font-display font-medium text-[#301C27] tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-bold text-admin-text mb-4 tracking-tight leading-tight">
             Invitaciones
           </h1>
-          <p className="text-[15px] font-light text-[#765E68] mt-1">
+          <p className="text-[17px] font-light text-admin-text-muted tracking-wide">
             Gestiona las invitaciones de reseña para tus clientas
           </p>
         </div>
@@ -73,25 +73,25 @@ export const InvitationsView = () => {
             setCreateError(null);
             setIsCreateOpen(true);
           }}
-          className="flex items-center gap-2 px-6 py-3 bg-[#301C27] text-white rounded-xl font-medium tracking-wide hover:bg-[#4A2B3D] transition-colors shadow-sm self-start sm:self-auto"
+          className="flex items-center gap-3 px-7 py-3.5 bg-admin-text text-admin-bg rounded-2xl text-[14px] font-medium tracking-wide hover:bg-admin-accent-dark transition-all shadow-[0_4px_16px_rgba(45,32,37,0.15)] self-start sm:self-auto group"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-5 h-5 transition-transform group-hover:scale-110" strokeWidth={1.5} />
           Nueva invitación
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl border border-[#EBDDE2]/50 shadow-[0_8px_30px_rgba(0,0,0,0.04)] p-6 min-h-[400px]">
+      <div className="bg-admin-surface rounded-[2.5rem] border border-admin-neutral/40 shadow-[0_8px_30px_rgba(45,32,37,0.03)] p-6 md:p-8 min-h-[400px]">
         {isLoading ? (
-          <div className="flex items-center justify-center h-64 text-[#A8929D] font-light">
+          <div className="flex items-center justify-center h-64 text-admin-text-muted font-light tracking-wide">
             Cargando invitaciones...
           </div>
         ) : invitations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-[#A8929D] font-light text-center">
-            <div className="w-16 h-16 bg-[#FAF7F7] rounded-full flex items-center justify-center mb-4">
-              <Plus className="w-8 h-8 text-[#EBDDE2]" />
+          <div className="flex flex-col items-center justify-center h-64 text-admin-text-muted font-light text-center border border-admin-neutral/40 border-dashed rounded-[2rem] bg-admin-surface-2/30">
+            <div className="w-20 h-20 bg-admin-surface rounded-full flex items-center justify-center mb-6 shadow-sm border border-admin-neutral/40">
+              <Send className="w-8 h-8 text-admin-neutral" strokeWidth={1.5} />
             </div>
-            <p>No has enviado ninguna invitación aún.</p>
-            <p className="text-sm mt-1">Crea tu primera invitación para empezar.</p>
+            <p className="text-[17px] text-admin-text font-medium mb-2 tracking-wide">No has enviado ninguna invitación aún</p>
+            <p className="text-[15px] font-light">Crea tu primera invitación para empezar.</p>
           </div>
         ) : (
           <InvitationList 

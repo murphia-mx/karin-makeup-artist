@@ -32,8 +32,8 @@ export class LandingBuilder {
       description: workspace.short_description || fallbackDescription,
       image: landing.hero_image_url || workspace.cover_image_url || defaultCover,
       cta: {
-        text: landing.hero_cta_text || (workspace.whatsapp ? 'AGENDAR CITA' : 'CONTÁCTANOS'),
-        actionUrl: workspace.whatsapp ? `https://wa.me/${workspace.whatsapp}` : '#contacto',
+        text: landing.hero_cta_text || 'AGENDAR CITA',
+        actionUrl: '/reservar',
       },
       badge: workspace.business_name || 'Makeup Artist',
       rating: workspace.show_rating_landing ? metrics.rating : 5.0,
@@ -46,8 +46,8 @@ export class LandingBuilder {
       businessName: workspace.business_name || 'Mi Negocio',
       businessSubtitle: workspace.tagline || 'Makeup Artist',
       cta: {
-        text: workspace.whatsapp ? 'AGENDAR CITA' : 'CONTÁCTANOS',
-        actionUrl: workspace.whatsapp ? `https://wa.me/${workspace.whatsapp}` : '#contacto',
+        text: 'AGENDAR CITA',
+        actionUrl: '/reservar',
       },
     };
 
@@ -80,8 +80,8 @@ export class LandingBuilder {
       titlePart1: landing.cta_title ? landing.cta_title.split(' ')[0] : '¿Lista para sentirte',
       titlePart2: landing.cta_title && landing.cta_title.split(' ').length > 1 ? landing.cta_title.split(' ').slice(1).join(' ') : 'más hermosa que nunca?',
       description: workspace.short_description || fallbackDescription,
-      buttonText: landing.cta_button_text || (workspace.whatsapp ? 'Agenda por WhatsApp' : 'Contáctanos'),
-      actionUrl: workspace.whatsapp ? `https://wa.me/${workspace.whatsapp}` : '#contacto',
+      buttonText: landing.cta_button_text || 'Agendar mi cita',
+      actionUrl: '/reservar',
       image: workspace.cover_image_url || defaultCover,
       isVisible: true, // Always show CTA, even without whatsapp, it directs to contact section
     };

@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import type { PortfolioCategory } from "./types";
-import { PORTFOLIO_DATA } from "./data";
 import { Banner } from "./components/Banner";
 import { PortfolioFilters } from "./components/Filters";
 import { PortfolioSearchBar } from "./components/SearchBar";
@@ -10,8 +9,35 @@ import { WhatsAppBanner } from "./components/WhatsAppBanner";
 import Navbar from "../landing/Navbar";
 import Footer from "../landing/Footer";
 import { usePublicContent } from "../domains/content/hooks/usePublicContent";
+import { useQuery } from "@tanstack/react-query";
+import { supabaseAny as supabase } from "../lib/supabase";
 
 export default function PortfolioPage() {
+  const { data: dbItems = [] } = useQuery({
+    queryKey: ['public_portfolio'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('gallery_projects')
+        .select('*')
+        .eq('active', true)
+        .order('display_order', { ascending: true });
+      if (error) throw new Error(error.message);
+      
+      // Mapear los datos de Supabase a la estructura que espera el PortfolioGrid
+      return (data || []).map((p: any) => ({
+        id: p.id,
+        title: p.title,
+        category: p.category,
+        image: p.image_url,
+        featured: p.is_favorite,
+        description: p.description || '',
+        serviceType: p.category, // fallback for search
+        order: p.display_order,
+        createdAt: p.created_at
+      }));
+    },
+    staleTime: 1000 * 60 * 5,
+  });
   const { models } = usePublicContent();
   const landing = models?.landing;
 
@@ -21,7 +47,7 @@ export default function PortfolioPage() {
 
   // Filtrado en tiempo real
   const filteredItems = useMemo(() => {
-    return PORTFOLIO_DATA.filter((item) => {
+    return dbItems.filter((item: any) => {
       // 1. Filtro por categoría
       if (activeCategory !== "Todas" && item.category !== activeCategory) {
         return false;
@@ -41,8 +67,8 @@ export default function PortfolioPage() {
       }
       
       return true;
-    }).sort((a, b) => a.order - b.order); // Mantener el orden curado
-  }, [activeCategory, searchQuery]);
+    }).sort((a: any, b: any) => a.order - b.order); // Mantener el orden curado
+  }, [activeCategory, searchQuery, dbItems]);
 
   return (
     <div className="min-h-screen bg-[rgb(255,252,251)] font-sans text-[rgb(74,36,50)]">
@@ -91,7 +117,7 @@ export default function PortfolioPage() {
             <PortfolioGrid 
               items={filteredItems} 
               onItemClick={(item) => {
-                const idx = filteredItems.findIndex(i => i.id === item.id);
+                const idx = filteredItems.findIndex((i: any) => i.id === item.id);
                 setLightboxIndex(idx);
               }} 
             />

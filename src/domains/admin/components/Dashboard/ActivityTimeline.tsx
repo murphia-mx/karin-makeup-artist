@@ -7,10 +7,10 @@ const TimelineSkeleton = () => (
     <div className="space-y-6 flex-1">
       {[1, 2, 3, 4, 5].map(i => (
         <div key={i} className="flex gap-4">
-          <div className="w-8 h-8 rounded-full bg-[#EBDDE2]/30 shrink-0" />
+          <div className="w-8 h-8 rounded-full bg-admin-surface-2 shrink-0" />
           <div className="flex-1 space-y-2 py-1">
-            <div className="w-16 h-2 bg-[#EBDDE2]/50 rounded" />
-            <div className="w-32 h-3 bg-[#EBDDE2]/50 rounded" />
+            <div className="w-16 h-2 bg-admin-neutral/40 rounded" />
+            <div className="w-32 h-3 bg-admin-neutral/40 rounded" />
           </div>
         </div>
       ))}
@@ -36,14 +36,14 @@ export const ActivityTimeline = () => {
 
   const getEventColor = (type: string) => {
     switch (type) {
-      case 'review_created': return 'bg-[#301C27]/5 text-[#301C27] border-[#301C27]/10';
-      case 'review_approved': return 'bg-white text-[#CF7F9B] border-[#EBDDE2]/50 shadow-[0_2px_8px_rgba(207,127,155,0.05)]';
-      case 'review_rejected': return 'bg-white text-[#765E68] border-[#EBDDE2]/50 shadow-[0_2px_8px_rgba(118,94,104,0.05)]';
-      case 'review_featured': return 'bg-[#FDFBFB] text-[#D9A05B] border-[#D9A05B]/10';
-      case 'review_replied': return 'bg-[#FAF7F7] text-[#301C27] border-[#EBDDE2]/50';
-      case 'invitation_sent': return 'bg-[#F3E4E9]/50 text-[#CF7F9B] border-[#F3E4E9]';
-      case 'invitation_used': return 'bg-[#FAF7F7] text-[#765E68] border-[#EBDDE2]/50';
-      default: return 'bg-[#FAF7F7] text-[#765E68] border-[#EBDDE2]/50';
+      case 'review_created': return 'bg-admin-surface-2 text-admin-text border-admin-neutral/50';
+      case 'review_approved': return 'bg-admin-surface text-admin-success border-admin-neutral/50 shadow-[0_2px_8px_rgba(45,32,37,0.02)]';
+      case 'review_rejected': return 'bg-admin-surface text-admin-text-muted border-admin-neutral/50 shadow-[0_2px_8px_rgba(45,32,37,0.02)]';
+      case 'review_featured': return 'bg-admin-surface-3/30 text-admin-warning border-admin-warning/20';
+      case 'review_replied': return 'bg-admin-surface text-admin-text border-admin-neutral/50';
+      case 'invitation_sent': return 'bg-admin-surface-3/50 text-admin-accent-dark border-admin-surface-3';
+      case 'invitation_used': return 'bg-admin-surface text-admin-text-muted border-admin-neutral/50';
+      default: return 'bg-admin-surface text-admin-text-muted border-admin-neutral/50';
     }
   };
 
@@ -63,17 +63,17 @@ export const ActivityTimeline = () => {
           
           {!recentActivity || recentActivity.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center py-10">
-              <Sparkles className="w-6 h-6 text-[#EBDDE2] mb-3" />
-              <p className="text-[11px] uppercase tracking-widest font-semibold text-[#765E68]/60 mb-1">Sin Actividad</p>
-              <p className="text-xs text-[#765E68]/80 font-light max-w-[200px] leading-relaxed">
+              <Sparkles className="w-6 h-6 text-admin-neutral mb-3" />
+              <p className="text-[10px] uppercase tracking-widest font-bold text-admin-text-muted/60 mb-1">Sin Actividad</p>
+              <p className="text-[13px] text-admin-text-muted font-light max-w-[200px] leading-relaxed">
                 Los eventos de tus clientas aparecerán aquí.
               </p>
             </div>
           ) : (
-            <div className="relative overflow-y-auto pr-4 custom-scrollbar" style={{ maxHeight: '500px' }}>
-              <div className="absolute left-[15px] top-2 bottom-6 w-px bg-gradient-to-b from-[#EBDDE2]/50 via-[#EBDDE2]/30 to-transparent" />
+            <div className="relative overflow-y-auto pr-4 scrollbar-hide" style={{ maxHeight: '500px' }}>
+              <div className="absolute left-[15px] top-2 bottom-6 w-px bg-gradient-to-b from-admin-neutral/70 via-admin-neutral/30 to-transparent" />
               
-              <div className="space-y-6 pb-6">
+              <div className="space-y-7 pb-6">
                 {recentActivity.map((item, i) => {
                   const colorClass = getEventColor(item.type);
                   return (
@@ -89,14 +89,14 @@ export const ActivityTimeline = () => {
                       </div>
                       <div className="flex-1 pb-1">
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-[10px] font-medium tracking-widest text-[#765E68]/60 uppercase">
+                          <span className="text-[9px] font-bold tracking-[0.15em] text-admin-text-muted/60 uppercase">
                             {new Date(item.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
-                        <div className="text-[13px] font-medium text-[#301C27] mb-0.5 leading-snug">
+                        <div className="text-[14px] font-medium text-admin-text mb-0.5 leading-snug">
                           {item.title}
                         </div>
-                        <div className="text-[13px] text-[#765E68] font-light leading-snug">
+                        <div className="text-[13px] text-admin-text-muted font-light leading-snug">
                           {item.description || 'Evento registrado en el sistema.'}
                         </div>
                       </div>

@@ -5,67 +5,69 @@ import { DashboardCharts } from '../components/Dashboard/DashboardCharts';
 import { BusinessInsights } from '../components/Dashboard/BusinessInsights';
 import { AiAdvisorWidget } from '../components/Dashboard/AiAdvisorWidget';
 import { ActivityTimeline } from '../components/Dashboard/ActivityTimeline';
+import { Sparkles, Activity, BarChart2, MessageSquare, BrainCircuit } from 'lucide-react';
 
 export const DashboardView = () => {
   return (
-    <div className="w-full pb-20 font-sans">
+    <div className="w-full pb-20 font-admin-sans">
       
-      {/* 1. Encabezado Editorial (Saludo y Contexto) */}
-      <section className="mb-12 md:mb-16">
+      {/* HEADER: Saludo y Contexto */}
+      <section className="mb-10">
         <BusinessHealth />
       </section>
 
-      {/* 2. La IA como Insight Principal Orgánico (no widget) */}
-      <section className="mb-16 md:mb-20">
-        <AiAdvisorWidget />
-      </section>
-
-      {/* 3. Datos Duros: Jerarquía tipográfica, no tarjetas idénticas */}
-      <section className="mb-20">
-        <div className="mb-6 flex items-baseline justify-between border-b border-[#EBDDE2]/50 pb-4">
-          <h2 className="text-[10px] font-semibold text-[#765E68]/60 uppercase tracking-widest">Estado del Negocio</h2>
-        </div>
+      {/* KPI STRIP */}
+      <section className="mb-12">
         <BusinessKPIs />
       </section>
 
-      {/* 4. Columnas Naturales (Gráficos vs Acciones) */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-        
-        {/* Columna Principal: Gráficos y Tendencias */}
-        <div className="lg:col-span-8 flex flex-col gap-16">
-          <div>
-            <div className="mb-8 flex items-baseline justify-between border-b border-[#EBDDE2]/50 pb-4">
-              <h2 className="text-[10px] font-semibold text-[#765E68]/60 uppercase tracking-widest">Rendimiento Histórico</h2>
-            </div>
-            <DashboardCharts />
+      {/* GRID CENTRAL: Acciones rápidas / Operaciones & Actividad */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center gap-2 pb-3 border-b border-admin-border/50">
+            <Sparkles className="w-4 h-4 text-admin-accent-light" strokeWidth={2} />
+            <h2 className="text-[12px] font-bold text-admin-text uppercase tracking-[0.15em]">Próximos Pasos</h2>
           </div>
-          
-          <div>
-            <div className="mb-8 flex items-baseline justify-between border-b border-[#EBDDE2]/50 pb-4">
-              <h2 className="text-[10px] font-semibold text-[#765E68]/60 uppercase tracking-widest">Análisis Cualitativo</h2>
-            </div>
-            <BusinessInsights />
-          </div>
+          <QuickActions />
         </div>
 
-        {/* Columna Secundaria: Operaciones (Flotante, más sutil) */}
-        <div className="lg:col-span-4 flex flex-col gap-12">
-          <div>
-            <div className="mb-6 flex items-baseline justify-between border-b border-[#EBDDE2]/50 pb-4">
-              <h2 className="text-[10px] font-semibold text-[#765E68]/60 uppercase tracking-widest">Acciones Rápidas</h2>
-            </div>
-            <QuickActions />
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center gap-2 pb-3 border-b border-admin-border/50">
+            <Activity className="w-4 h-4 text-admin-accent-light" strokeWidth={2} />
+            <h2 className="text-[12px] font-bold text-admin-text uppercase tracking-[0.15em]">Actividad Reciente</h2>
           </div>
-
-          <div>
-            <div className="mb-6 flex items-baseline justify-between border-b border-[#EBDDE2]/50 pb-4">
-              <h2 className="text-[10px] font-semibold text-[#765E68]/60 uppercase tracking-widest">Registro de Actividad</h2>
-            </div>
-            <ActivityTimeline />
-          </div>
+          <ActivityTimeline />
         </div>
-        
       </section>
+
+      {/* GRÁFICOS Y ANÁLISIS CUALITATIVO */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center gap-2 pb-3 border-b border-admin-border/50">
+            <BarChart2 className="w-4 h-4 text-admin-accent-light" strokeWidth={2} />
+            <h2 className="text-[12px] font-bold text-admin-text uppercase tracking-[0.15em]">Rendimiento Histórico</h2>
+          </div>
+          <DashboardCharts />
+        </div>
+        
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center gap-2 pb-3 border-b border-admin-border/50">
+            <MessageSquare className="w-4 h-4 text-admin-accent-light" strokeWidth={2} />
+            <h2 className="text-[12px] font-bold text-admin-text uppercase tracking-[0.15em]">Resumen de Reseñas</h2>
+          </div>
+          <BusinessInsights />
+        </div>
+      </section>
+
+      {/* IA (Módulo Secundario) */}
+      <section className="mt-16">
+        <div className="flex items-center gap-2 pb-3 border-b border-admin-border/50 mb-6">
+          <BrainCircuit className="w-4 h-4 text-admin-accent-light" strokeWidth={2} />
+          <h2 className="text-[12px] font-bold text-admin-text uppercase tracking-[0.15em]">Insight Automático (IA)</h2>
+        </div>
+        <AiAdvisorWidget />
+      </section>
+
     </div>
   );
 };

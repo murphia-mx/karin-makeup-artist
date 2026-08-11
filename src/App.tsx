@@ -62,12 +62,18 @@ const LandingView = lazy(() =>
     default: m.LandingView,
   })),
 );
-// Placeholder views
 const GalleryView = lazy(() =>
-  import("./domains/workspace/views/PlaceholderViews").then((m) => ({
+  import("./domains/workspace/views/GalleryView").then((m) => ({
     default: m.GalleryView,
   })),
 );
+const BookingView = lazy(() => import("./domains/booking/views/BookingView"));
+const ReservationsView = lazy(() =>
+  import("./domains/workspace/views/ReservationsView").then((m) => ({
+    default: m.ReservationsView,
+  })),
+);
+// Placeholder views
 const AppearanceView = lazy(() =>
   import("./domains/workspace/views/PlaceholderViews").then((m) => ({
     default: m.AppearanceView,
@@ -76,11 +82,6 @@ const AppearanceView = lazy(() =>
 const PromotionsView = lazy(() =>
   import("./domains/workspace/views/PlaceholderViews").then((m) => ({
     default: m.PromotionsView,
-  })),
-);
-const BookingsView = lazy(() =>
-  import("./domains/workspace/views/PlaceholderViews").then((m) => ({
-    default: m.BookingsView,
   })),
 );
 const ReviewSettingsView = lazy(() =>
@@ -142,7 +143,7 @@ function App() {
         <Routes>
           {/* Public Website */}
           <Route path="/" element={<PublicSite />} />
-          <Route path="/portafolio" element={
+          <Route path="portafolio" element={
             <Suspense fallback={
               <div className="min-h-screen bg-[rgb(255,254,253)] flex items-center justify-center animate-pulse text-[rgb(74,36,50)] font-sans text-[10px] tracking-[0.3em] uppercase">
                 Cargando...
@@ -151,8 +152,13 @@ function App() {
               <PortfolioPage />
             </Suspense>
           } />
+          <Route path="reservar" element={
+            <Suspense fallback={<div className="min-h-screen bg-white" />}>
+              <BookingView />
+            </Suspense>
+          } />
           
-          <Route path="/leave-review" element={
+          <Route path="leave-review" element={
             <Suspense fallback={<div className="min-h-screen bg-white" />}>
               <PublicReviewView />
             </Suspense>
@@ -187,15 +193,27 @@ function App() {
               />
               <Route
                 path="services"
-                element={<div className="p-8 text-brand-text-muted font-light">Servicios (Próximamente)</div>}
+                element={
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <ServicesView />
+                  </Suspense>
+                }
               />
               <Route
                 path="gallery"
-                element={<div className="p-8 text-brand-text-muted font-light">Galería (Próximamente)</div>}
+                element={
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <GalleryView />
+                  </Suspense>
+                }
               />
               <Route
-                path="bookings"
-                element={<div className="p-8 text-brand-text-muted font-light">Reservas (Próximamente)</div>}
+                path="reservas"
+                element={
+                  <Suspense fallback={<DashboardSkeleton />}>
+                    <ReservationsView />
+                  </Suspense>
+                }
               />
               <Route
                 path="invitations"
@@ -221,12 +239,12 @@ function App() {
               >
                 <Route index element={<WorkspaceView />} />
                 <Route path="business" element={<BusinessView />} />
-                <Route path="services" element={<ServicesView />} />
+
                 <Route path="landing" element={<LandingView />} />
                 <Route path="gallery" element={<GalleryView />} />
                 <Route path="appearance" element={<AppearanceView />} />
                 <Route path="promotions" element={<PromotionsView />} />
-                <Route path="bookings" element={<BookingsView />} />
+                <Route path="reservas" element={<ReservationsView />} />
                 <Route
                   path="reviews-settings"
                   element={<ReviewSettingsView />}
