@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -157,11 +157,23 @@ const GalleryCard = ({
   onEdit,
   selected,
   onSelect,
+  reorderMode,
+  isDragOver,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
 }: {
   project: GalleryProject;
   onEdit: (p: GalleryProject) => void;
   selected: boolean;
   onSelect: () => void;
+  reorderMode?: boolean;
+  isDragOver?: boolean;
+  onDragStart?: () => void;
+  onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: () => void;
+  onDragEnd?: () => void;
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isUpdatingCategory, setIsUpdatingCategory] = useState(false);
@@ -329,7 +341,23 @@ const GalleryCard = ({
         duration: 0.28,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="group flex items-stretch gap-3 sm:gap-4"
+      onDragOver={onDragOver}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDrop?.();
+      }}
+      onDragEnd={onDragEnd}
+      className={`
+        group
+        flex
+        items-stretch
+        gap-3
+        sm:gap-4
+        rounded-[28px]
+        transition-all
+        duration-200
+        ${isDragOver ? "ring-2 ring-[#D26E87]/35 ring-offset-4 ring-offset-admin-bg" : ""}
+      `}
     >
       {/* ========================================================
           LEFT ACTION RAIL
@@ -365,20 +393,33 @@ const GalleryCard = ({
         {/* Drag */}
 
         <div
-          className="
+          draggable={reorderMode}
+          onDragStart={(e) => {
+            if (!reorderMode) {
+              e.preventDefault();
+              return;
+            }
+            e.dataTransfer.effectAllowed = "move";
+            onDragStart?.();
+          }}
+          className={`
             w-8 h-8
             rounded-lg
             flex items-center justify-center
-            text-admin-text-muted/35
-            group-hover:text-admin-text-muted/65
-            hover:bg-admin-surface-2
-            cursor-grab
-            active:cursor-grabbing
             transition-all
-          "
-          title="Arrastrar para reordenar"
+            ${
+              reorderMode
+                ? "text-[#D26E87] bg-[#FFF7F9] border border-[#F0D5DD] cursor-grab active:cursor-grabbing shadow-[0_4px_12px_rgba(210,110,135,0.08)]"
+                : "text-admin-text-muted/35 group-hover:text-admin-text-muted/65 hover:bg-admin-surface-2 cursor-default"
+            }
+          `}
+          title={
+            reorderMode
+              ? "Arrastra este control para cambiar el orden"
+              : "Activa Reordenar para mover proyectos"
+          }
         >
-          <GripVertical className="w-4 h-4" strokeWidth={1.6} />
+          <GripVertical className="w-4 h-4" strokeWidth={1.7} />
         </div>
       </div>
 
@@ -2077,8 +2118,95 @@ export const GalleryView = () => {
   >(null);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [reorderMode, setReorderMode] = useState(false);
+  const [draftOrder, setDraftOrder] = useState<string[]>([]);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [savingOrder, setSavingOrder] = useState(false);
 
   const [, setBulkUpdating] = useState(false);
+
+  useEffect(() => {
+    if (!reorderMode) {
+      setDraftOrder(projects.map((project) => project.id));
+    }
+  }, [projects, reorderMode]);
+
+  const orderedProjects =
+    draftOrder.length === projects.length
+      ? [...projects].sort(
+          (a, b) => draftOrder.indexOf(a.id) - draftOrder.indexOf(b.id),
+        )
+      : projects;
+
+  const moveProject = (sourceId: string, targetId: string) => {
+    if (sourceId === targetId) return;
+
+    setDraftOrder((current) => {
+      const sourceIndex = current.indexOf(sourceId);
+      const targetIndex = current.indexOf(targetId);
+
+      if (sourceIndex === -1 || targetIndex === -1) return current;
+
+      const next = [...current];
+      next.splice(sourceIndex, 1);
+      next.splice(targetIndex, 0, sourceId);
+
+      return next;
+    });
+  };
+
+  const startReordering = () => {
+    setDraftOrder(projects.map((project) => project.id));
+    setDraggingId(null);
+    setDragOverId(null);
+    setReorderMode(true);
+  };
+
+  const cancelReordering = () => {
+    setDraftOrder(projects.map((project) => project.id));
+    setDraggingId(null);
+    setDragOverId(null);
+    setReorderMode(false);
+  };
+
+  const saveOrder = async () => {
+    if (draftOrder.length !== projects.length || savingOrder) return;
+
+    setSavingOrder(true);
+
+    try {
+      const updates = draftOrder.map((id, index) =>
+        supabase
+          .from("gallery_projects")
+          .update({ display_order: index })
+          .eq("id", id),
+      );
+
+      const results = await Promise.all(updates);
+      const failed = results.find((result) => result.error);
+
+      if (failed?.error) throw failed.error;
+
+      await queryClient.invalidateQueries({
+        queryKey: ["workspace", "gallery"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["landing_gallery"],
+      });
+
+      toast.success("Orden de la galería guardado");
+
+      setDraggingId(null);
+      setDragOverId(null);
+      setReorderMode(false);
+    } catch (err: any) {
+      toast.error(`No se pudo guardar el orden: ${err.message}`);
+    } finally {
+      setSavingOrder(false);
+    }
+  };
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) =>
@@ -2290,9 +2418,13 @@ export const GalleryView = () => {
     );
   }
 
-  const featuredProjects = projects.filter((project) => project.is_favorite);
+  const featuredProjects = orderedProjects.filter(
+    (project) => project.is_favorite,
+  );
 
-  const regularProjects = projects.filter((project) => !project.is_favorite);
+  const regularProjects = orderedProjects.filter(
+    (project) => !project.is_favorite,
+  );
 
   const featuredCount = featuredProjects.length;
 
@@ -2322,36 +2454,142 @@ export const GalleryView = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => setEditingProject("mass-upload")}
-          className="
-            group
-            inline-flex
-            items-center
-            justify-center
-            gap-2.5
-            px-6
-            h-12
-            rounded-full
-            bg-admin-text
-            text-admin-bg
-            text-[12px]
-            font-semibold
-            tracking-wide
-            shadow-[0_10px_28px_rgba(45,32,37,0.13)]
-            hover:bg-admin-accent-dark
-            hover:-translate-y-0.5
-            hover:shadow-[0_14px_34px_rgba(45,32,37,0.18)]
-            transition-all
-            shrink-0
-          "
-        >
-          <Plus
-            className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300"
-            strokeWidth={1.8}
-          />
-          Agregar fotos
-        </button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+          {!reorderMode ? (
+            <button
+              onClick={startReordering}
+              disabled={projects.length < 2}
+              className="
+                inline-flex
+                items-center
+                justify-center
+                gap-2
+                px-5
+                h-12
+                rounded-full
+                border
+                border-admin-neutral/50
+                bg-admin-surface
+                text-admin-text
+                text-[12px]
+                font-semibold
+                tracking-wide
+                hover:border-[#D26E87]/40
+                hover:bg-[#FFF9FB]
+                hover:-translate-y-0.5
+                transition-all
+                disabled:opacity-40
+                disabled:cursor-not-allowed
+              "
+              title={
+                projects.length < 2
+                  ? "Necesitas al menos 2 proyectos"
+                  : "Cambiar el orden de la galería"
+              }
+            >
+              <GripVertical
+                className="w-4 h-4 text-[#D26E87]"
+                strokeWidth={1.8}
+              />
+              Reordenar
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={cancelReordering}
+                disabled={savingOrder}
+                className="
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-2
+                  px-5
+                  h-12
+                  rounded-full
+                  border
+                  border-admin-neutral/50
+                  bg-admin-surface
+                  text-admin-text-muted
+                  text-[12px]
+                  font-semibold
+                  tracking-wide
+                  hover:text-admin-text
+                  hover:bg-admin-surface-2
+                  transition-all
+                  disabled:opacity-50
+                "
+              >
+                <X className="w-4 h-4" strokeWidth={1.8} />
+                Cancelar
+              </button>
+
+              <button
+                onClick={saveOrder}
+                disabled={savingOrder}
+                className="
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-2
+                  px-5
+                  h-12
+                  rounded-full
+                  bg-[#D26E87]
+                  text-white
+                  text-[12px]
+                  font-semibold
+                  tracking-wide
+                  shadow-[0_10px_28px_rgba(210,110,135,0.20)]
+                  hover:bg-[#C35E78]
+                  hover:-translate-y-0.5
+                  transition-all
+                  disabled:opacity-60
+                "
+              >
+                {savingOrder ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Check className="w-4 h-4" strokeWidth={2.2} />
+                )}
+                {savingOrder ? "Guardando..." : "Guardar orden"}
+              </button>
+            </>
+          )}
+
+          <button
+            onClick={() => setEditingProject("mass-upload")}
+            disabled={reorderMode}
+            className="
+              group
+              inline-flex
+              items-center
+              justify-center
+              gap-2.5
+              px-6
+              h-12
+              rounded-full
+              bg-admin-text
+              text-admin-bg
+              text-[12px]
+              font-semibold
+              tracking-wide
+              shadow-[0_10px_28px_rgba(45,32,37,0.13)]
+              hover:bg-admin-accent-dark
+              hover:-translate-y-0.5
+              hover:shadow-[0_14px_34px_rgba(45,32,37,0.18)]
+              transition-all
+              shrink-0
+              disabled:opacity-40
+              disabled:cursor-not-allowed
+            "
+          >
+            <Plus
+              className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300"
+              strokeWidth={1.8}
+            />
+            Agregar fotos
+          </button>
+        </div>
       </div>
 
       {/* ========================================================
@@ -2416,6 +2654,51 @@ export const GalleryView = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {reorderMode && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="
+            mb-8
+            rounded-[22px]
+            border
+            border-[#F0D5DD]
+            bg-[#FFF9FB]
+            px-5
+            py-4
+            flex
+            flex-col
+            sm:flex-row
+            sm:items-center
+            sm:justify-between
+            gap-4
+          "
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-white border border-[#F0DCE3] flex items-center justify-center shrink-0">
+              <GripVertical
+                className="w-4 h-4 text-[#D26E87]"
+                strokeWidth={1.8}
+              />
+            </div>
+
+            <div>
+              <p className="text-[13px] font-semibold text-admin-text">
+                Modo de reordenamiento
+              </p>
+              <p className="text-[12px] text-admin-text-muted font-light mt-0.5">
+                Arrastra el control ⋮⋮ de cada proyecto para cambiar su
+                posición. El nuevo orden no se publicará hasta guardar.
+              </p>
+            </div>
+          </div>
+
+          <span className="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-full bg-white border border-[#F0DCE3] text-[10px] font-bold uppercase tracking-[0.13em] text-[#B83265]">
+            {projects.length} proyectos
+          </span>
+        </motion.div>
       )}
 
       {/* ========================================================
@@ -2539,6 +2822,30 @@ export const GalleryView = () => {
                       onEdit={setEditingProject}
                       selected={selectedIds.includes(project.id)}
                       onSelect={() => toggleSelect(project.id)}
+                      reorderMode={reorderMode}
+                      isDragOver={dragOverId === project.id}
+                      onDragStart={() => setDraggingId(project.id)}
+                      onDragOver={(e) => {
+                        if (
+                          !reorderMode ||
+                          !draggingId ||
+                          draggingId === project.id
+                        )
+                          return;
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        setDragOverId(project.id);
+                      }}
+                      onDrop={() => {
+                        if (!reorderMode || !draggingId) return;
+                        moveProject(draggingId, project.id);
+                        setDraggingId(null);
+                        setDragOverId(null);
+                      }}
+                      onDragEnd={() => {
+                        setDraggingId(null);
+                        setDragOverId(null);
+                      }}
                     />
                   ))}
                 </AnimatePresence>
@@ -2589,6 +2896,30 @@ export const GalleryView = () => {
                       onEdit={setEditingProject}
                       selected={selectedIds.includes(project.id)}
                       onSelect={() => toggleSelect(project.id)}
+                      reorderMode={reorderMode}
+                      isDragOver={dragOverId === project.id}
+                      onDragStart={() => setDraggingId(project.id)}
+                      onDragOver={(e) => {
+                        if (
+                          !reorderMode ||
+                          !draggingId ||
+                          draggingId === project.id
+                        )
+                          return;
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        setDragOverId(project.id);
+                      }}
+                      onDrop={() => {
+                        if (!reorderMode || !draggingId) return;
+                        moveProject(draggingId, project.id);
+                        setDraggingId(null);
+                        setDragOverId(null);
+                      }}
+                      onDragEnd={() => {
+                        setDraggingId(null);
+                        setDragOverId(null);
+                      }}
                     />
                   ))}
                 </AnimatePresence>

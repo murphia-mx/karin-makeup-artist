@@ -8,23 +8,36 @@ export class LandingBuilder {
     workspace: WorkspaceConfig,
     landing: LandingConfig,
     services: ServiceExtended[],
-    gallery: { id: string; url: string; image: string; alt: string; category?: string; title?: string; description?: string }[],
+    gallery: {
+      id: string;
+      url: string;
+      image: string;
+      alt: string;
+      category?: string;
+      title?: string;
+      description?: string;
+    }[],
     reviews: any[],
     metrics: { rating: number; reviewCount: number },
   ): LandingViewModel {
     // Intelligent Fallbacks
     const fallbackTitle = "Tu belleza en manos expertas.";
+
     const fallbackSubtitle =
       "Maquillaje profesional diseñado para resaltar tu esencia en cada momento especial.";
+
     const defaultCover =
       "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=80&w=1600&auto=format&fit=crop";
+
     const activeServices = services.filter(
       (s) => s.active && s.show_in_landing,
     );
+
     const mainServiceCategory =
       activeServices.length > 0
         ? activeServices[0].category.toLowerCase()
         : "belleza";
+
     const fallbackDescription = `Especialista en ${mainServiceCategory} y cuidado de la piel. Trabajamos juntas para crear el look perfecto que te haga sentir segura y radiante.`;
 
     const galleryModel = {
@@ -88,7 +101,9 @@ export class LandingBuilder {
       },
       copyrightText:
         landing.footer_credits ||
-        `© ${new Date().getFullYear()} ${workspace.business_name || "Mi Negocio"}. Todos los derechos reservados.`,
+        `© ${new Date().getFullYear()} ${
+          workspace.business_name || "Mi Negocio"
+        }. Todos los derechos reservados.`,
     };
 
     // 4. CTA Final Model
@@ -105,7 +120,7 @@ export class LandingBuilder {
       buttonText: landing.cta_button_text || "Agendar mi cita",
       actionUrl: "/reservar",
       image: workspace.cover_image_url || defaultCover,
-      isVisible: true, // Always show CTA, even without whatsapp, it directs to contact section
+      isVisible: true,
     };
 
     // 5. Services Model
@@ -120,6 +135,7 @@ export class LandingBuilder {
 
     // 6. FAQ Model
     const faqItems = landing.faq_items || [];
+
     const faq = {
       items: faqItems.map((item) => ({
         question: item.q,
@@ -129,21 +145,32 @@ export class LandingBuilder {
     };
 
     // 8. Testimonials Model
-    const featuredReviews = reviews.filter((r) =>
-      landing.featured_review_ids?.includes(r.id),
+    //
+    // La fuente de verdad para una reseña destacada es ahora
+    // reviews.featured, que es el mismo campo que modifica
+    // el Centro de Moderación.
+    //
+    // Antes se utilizaba landing.featured_review_ids, lo que
+    // podía provocar que la dashboard mostrara una reseña
+    // como destacada mientras la Landing mostraba otra.
+    const featuredReviews = reviews.filter(
+      (review) => review.featured === true,
     );
 
     const testimonialsModel = {
       eyebrow: "CLIENTAS FELICES",
       title: "Lo que cuentan",
       italicWord: "de su experiencia.",
+
       featuredReviews:
         featuredReviews.length > 0
           ? featuredReviews
           : reviews.length > 0
             ? [reviews[0]]
             : [],
-      allReviews: reviews, // Todas las reseñas aprobadas
+
+      allReviews: reviews,
+
       isVisible: reviews.length > 0 && landing.show_testimonials,
     };
 
