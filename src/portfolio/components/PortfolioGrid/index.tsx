@@ -10,24 +10,55 @@ interface Props {
 export function PortfolioGrid({ items, onItemClick }: Props) {
   return (
     <div className="w-full">
-      <motion.div 
+      <motion.div
         layout
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+        className="
+          grid
+          w-full
+          grid-cols-1
+          gap-x-5
+          gap-y-8
+          sm:grid-cols-2
+          sm:gap-x-6
+          sm:gap-y-10
+          lg:grid-cols-3
+          lg:gap-x-7
+          lg:gap-y-12
+        "
       >
         <AnimatePresence mode="popLayout">
-          {items.map((item, i) => (
+          {items.map((item, index) => (
             <motion.div
               key={item.id}
               layout
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ 
-                duration: 0.5, 
-                delay: Math.min(i * 0.05, 0.3),
-                ease: [0.25, 0.46, 0.45, 0.94] 
+              initial={{
+                opacity: 0,
+                y: 16,
               }}
-              className="w-full"
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                y: 8,
+              }}
+              transition={{
+                layout: {
+                  duration: 0.45,
+                  ease: [0.22, 1, 0.36, 1],
+                },
+                opacity: {
+                  duration: 0.35,
+                  delay: Math.min(index * 0.035, 0.18),
+                },
+                y: {
+                  duration: 0.55,
+                  delay: Math.min(index * 0.035, 0.18),
+                  ease: [0.22, 1, 0.36, 1],
+                },
+              }}
+              className="min-w-0"
             >
               <PortfolioCard item={item} onClick={() => onItemClick(item)} />
             </motion.div>

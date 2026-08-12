@@ -8,7 +8,7 @@ export class LandingBuilder {
     workspace: WorkspaceConfig,
     landing: LandingConfig,
     services: ServiceExtended[],
-    gallery: { url: string; alt: string; category?: string }[],
+    gallery: { id: string; url: string; image: string; alt: string; category?: string; title?: string; description?: string }[],
     reviews: any[],
     metrics: { rating: number; reviewCount: number },
   ): LandingViewModel {

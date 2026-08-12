@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ArrowUpRight } from "lucide-react";
 import type { PortfolioItem } from "../../types";
 
 interface Props {
@@ -9,44 +10,325 @@ interface Props {
 export function PortfolioCard({ item, onClick }: Props) {
   return (
     <motion.button
+      type="button"
       onClick={onClick}
-      className="group relative w-full aspect-[4/5] rounded-3xl overflow-hidden cursor-pointer block bg-[rgb(250,245,242)] shadow-[0_4px_20px_rgba(198,130,145,0.06)] hover:shadow-[0_12px_40px_rgba(198,130,145,0.2)] transition-shadow duration-500"
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+      whileHover={{ y: -3 }}
+      transition={{
+        duration: 0.45,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      className="
+        group
+        relative
+        block
+        w-full
+        aspect-[4/5]
+        cursor-pointer
+        overflow-hidden
+        rounded-[22px]
+        bg-[#eee9e8]
+        text-left
+        outline-none
+        focus-visible:ring-2
+        focus-visible:ring-[#ca6480]/50
+        focus-visible:ring-offset-4
+        focus-visible:ring-offset-[#fcfaf9]
+      "
+      style={{
+        boxShadow: "0 8px 30px rgba(74,36,50,0.055)",
+      }}
     >
-      {/* ── IMAGEN PRINCIPAL ── */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden">
-        <img
+      {/* ============================================================ */}
+      {/* IMAGE                                                         */}
+      {/* ============================================================ */}
+
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.img
           src={item.image}
           alt={item.title}
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:scale-105"
+          className="
+            h-full
+            w-full
+            object-cover
+            transition-transform
+            duration-[1100ms]
+            ease-[cubic-bezier(0.22,1,0.36,1)]
+            group-hover:scale-[1.035]
+          "
         />
       </div>
 
-      {/* ── OVERLAY ROSADO ELEGANTE ── */}
-      {/* Un overlay sutil constante para legibilidad que se intensifica a un rosa champagne en hover */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[rgba(74,36,50,0.5)] via-transparent to-transparent opacity-60 group-hover:opacity-0 transition-opacity duration-500" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(198,130,145,0.85)_0%,rgba(198,130,145,0.4)_40%,transparent_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      {/* ============================================================ */}
+      {/* VERY SUBTLE IMAGE TREATMENT                                   */}
+      {/* ============================================================ */}
 
-      {/* ── BORDE ILUMINADO SUTIL EN HOVER ── */}
-      <div className="absolute inset-0 border-[2px] border-[rgba(255,255,255,0.5)] opacity-0 group-hover:opacity-100 rounded-3xl pointer-events-none transition-opacity duration-500 mix-blend-overlay" />
+      {/* Top readability — practically invisible */}
+      <div
+        className="
+          pointer-events-none
+          absolute
+          inset-x-0
+          top-0
+          h-24
+          opacity-0
+          transition-opacity
+          duration-700
+          group-hover:opacity-100
+        "
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(20,12,15,0.12), transparent)",
+        }}
+      />
 
-      {/* ── INFORMACIÓN FLOTANTE ELEGANTE ── */}
-      <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end translate-y-2 group-hover:translate-y-0 transition-transform duration-500 ease-out">
-        
-        {/* Línea decorativa */}
-        <div className="w-8 h-[1px] bg-white/70 mb-3 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100" />
+      {/* Bottom readability */}
+      <div
+        className="
+          pointer-events-none
+          absolute
+          inset-x-0
+          bottom-0
+          h-[46%]
+          opacity-90
+          transition-opacity
+          duration-700
+          group-hover:opacity-100
+        "
+        style={{
+          background:
+            "linear-gradient(to top, rgba(28,18,22,0.68) 0%, rgba(28,18,22,0.24) 48%, transparent 100%)",
+        }}
+      />
 
-        <h3 className="text-left font-display text-2xl text-white font-light tracking-wide drop-shadow-sm mb-1 opacity-90 group-hover:opacity-100">
-          {item.title}
-        </h3>
-        
-        <p className="text-left font-sans text-[10px] text-[rgba(255,255,255,0.9)] uppercase tracking-[0.2em] font-medium opacity-0 group-hover:opacity-100 transition-all duration-500 delay-75 transform translate-y-2 group-hover:translate-y-0">
-          {item.serviceType} <span className="mx-1 text-white/50">•</span> Mérida
-        </p>
+      {/* ============================================================ */}
+      {/* TOP LABEL                                                      */}
+      {/* ============================================================ */}
 
+      <div
+        className="
+          absolute
+          left-5
+          top-5
+          flex
+          items-center
+          gap-2
+          opacity-0
+          transition-all
+          duration-500
+          ease-out
+          group-hover:translate-y-0
+          group-hover:opacity-100
+          translate-y-1
+        "
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-white" />
+
+        <span
+          className="
+            font-sans
+            text-[8px]
+            font-semibold
+            uppercase
+            tracking-[0.22em]
+            text-white
+          "
+        >
+          Ver trabajo
+        </span>
       </div>
+
+      {/* ============================================================ */}
+      {/* ARROW                                                         */}
+      {/* ============================================================ */}
+
+      <div
+        className="
+          absolute
+          right-5
+          top-5
+          flex
+          h-9
+          w-9
+          translate-y-1
+          items-center
+          justify-center
+          rounded-full
+          border
+          border-white/30
+          bg-black/10
+          text-white
+          opacity-0
+          backdrop-blur-md
+          transition-all
+          duration-500
+          ease-out
+          group-hover:translate-y-0
+          group-hover:opacity-100
+          group-hover:bg-white/15
+          group-hover:border-white/50
+        "
+      >
+        <ArrowUpRight
+          className="
+            h-[14px]
+            w-[14px]
+            transition-transform
+            duration-500
+            ease-out
+            group-hover:translate-x-[1px]
+            group-hover:-translate-y-[1px]
+          "
+        />
+      </div>
+
+      {/* ============================================================ */}
+      {/* CONTENT                                                       */}
+      {/* ============================================================ */}
+
+      <div
+        className="
+          absolute
+          inset-x-0
+          bottom-0
+          z-10
+          p-5
+          sm:p-6
+        "
+      >
+        {/* Category */}
+        <motion.div
+          initial={false}
+          className="
+            mb-2
+            flex
+            items-center
+            gap-2
+            transition-transform
+            duration-500
+            ease-out
+            group-hover:-translate-y-1
+          "
+        >
+          <span className="h-px w-5 bg-white/60" />
+
+          <span
+            className="
+              font-sans
+              text-[8px]
+              font-semibold
+              uppercase
+              tracking-[0.24em]
+              text-white/80
+            "
+          >
+            {item.serviceType || item.category}
+          </span>
+        </motion.div>
+
+        {/* Title */}
+        <motion.h3
+          initial={false}
+          className="
+            font-sans
+            text-[20px]
+            font-medium
+            leading-[1.05]
+            tracking-[-0.035em]
+            text-white
+            transition-transform
+            duration-500
+            ease-out
+            group-hover:-translate-y-1
+            sm:text-[22px]
+          "
+        >
+          {item.title}
+        </motion.h3>
+
+        {/* Location / metadata */}
+        <motion.div
+          initial={false}
+          className="
+            mt-3
+            flex
+            items-center
+            gap-2
+            overflow-hidden
+            transition-all
+            duration-500
+            ease-out
+            group-hover:max-h-8
+            group-hover:opacity-100
+            max-h-0
+            opacity-0
+          "
+        >
+          <span
+            className="
+              font-sans
+              text-[8px]
+              font-medium
+              uppercase
+              tracking-[0.18em]
+              text-white/60
+            "
+          >
+            Mérida
+          </span>
+
+          <span className="h-1 w-1 rounded-full bg-white/35" />
+
+          <span
+            className="
+              font-sans
+              text-[8px]
+              font-medium
+              uppercase
+              tracking-[0.18em]
+              text-white/60
+            "
+          >
+            Karin Makeup Artist
+          </span>
+        </motion.div>
+      </div>
+
+      {/* ============================================================ */}
+      {/* PREMIUM EDGE                                                  */}
+      {/* ============================================================ */}
+
+      <div
+        className="
+          pointer-events-none
+          absolute
+          inset-0
+          rounded-[22px]
+          ring-1
+          ring-inset
+          ring-black/[0.07]
+          transition-all
+          duration-500
+          group-hover:ring-white/20
+        "
+      />
+
+      {/* ============================================================ */}
+      {/* HOVER LIGHT                                                   */}
+      {/* ============================================================ */}
+
+      <div
+        className="
+          pointer-events-none
+          absolute
+          inset-0
+          bg-white/[0.035]
+          opacity-0
+          transition-opacity
+          duration-500
+          group-hover:opacity-100
+        "
+      />
     </motion.button>
   );
 }

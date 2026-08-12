@@ -1,211 +1,685 @@
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
+interface GalleryImage {
+  id?: string;
+  url: string;
+  alt?: string;
+  category?: string;
+  title?: string;
+}
 
-const LuxuryIcons = {
-  sparkle: (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  ),
-};
-
-export default function Gallery({
-  gallery,
-}: {
+interface GalleryProps {
   gallery?: {
-    images?: Array<{ url: string; alt: string; category?: string }>;
+    images?: GalleryImage[];
     isVisible?: boolean;
   };
-}) {
-  const displayImages = (gallery?.images || []).slice(0, 6);
+}
+
+const swipeConfidenceThreshold = 7000;
+
+function swipePower(offset: number, velocity: number) {
+  return Math.abs(offset) * velocity;
+}
+
+export default function Gallery({ gallery }: GalleryProps) {
+  const images = gallery?.images ?? [];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const total = images.length;
+
+  const nextSlide = useCallback(() => {
+    if (total <= 1) return;
+
+    setDirection(1);
+    setCurrentIndex((current) => (current + 1) % total);
+  }, [total]);
+
+  const previousSlide = useCallback(() => {
+    if (total <= 1) return;
+
+    setDirection(-1);
+    setCurrentIndex((current) => (current - 1 + total) % total);
+  }, [total]);
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      if (index === currentIndex) return;
+
+      setDirection(index > currentIndex ? 1 : -1);
+      setCurrentIndex(index);
+    },
+    [currentIndex],
+  );
+
+  /*
+   * Mantiene el índice válido si cambia la galería
+   * desde el CMS.
+   */
+  useEffect(() => {
+    if (currentIndex >= total && total > 0) {
+      setCurrentIndex(0);
+    }
+  }, [currentIndex, total]);
+
+  /*
+   * Teclado
+   */
+  useEffect(() => {
+    if (total <= 1) return;
+
+    const handleKeyboard = (event: KeyboardEvent) => {
+      if (event.key === "ArrowLeft") {
+        previousSlide();
+      }
+
+      if (event.key === "ArrowRight") {
+        nextSlide();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyboard);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyboard);
+    };
+  }, [nextSlide, previousSlide, total]);
+
+  /*
+   * Autoplay muy suave.
+   */
+  useEffect(() => {
+    if (total <= 1 || isHovered) return;
+
+    const interval = window.setInterval(() => {
+      nextSlide();
+    }, 6500);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [isHovered, nextSlide, total]);
+
+  if (!gallery?.isVisible || total === 0) {
+    return null;
+  }
+
+  const current = images[currentIndex];
+
+  const currentNumber = String(currentIndex + 1).padStart(2, "0");
+  const totalNumber = String(total).padStart(2, "0");
+
+  const title = current.title || current.category || "Maquillaje profesional";
+
+  const category = current.category || "Trabajo editorial";
 
   return (
     <section
       id="portafolio"
-      className="w-full py-28 md:py-36 overflow-hidden relative"
-      style={{ backgroundColor: "rgb(255, 254, 253)" }}
+      className="relative w-full overflow-hidden py-28 md:py-36"
+      style={{
+        background: "linear-gradient(180deg, #fffefd 0%, #fffafb 100%)",
+      }}
     >
-      {/* ── BACKGROUND ORBS (Reflejos rosados MUY sutiles) ── */}
+      {/* Luz ambiental extremadamente sutil */}
       <div
-        className="absolute -top-32 -left-32 w-[600px] h-[600px] rounded-full pointer-events-none opacity-40"
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-72 top-10 h-[650px] w-[650px] rounded-full"
         style={{
           background:
-            "radial-gradient(circle, rgba(235,168,185,0.06) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(210,110,135,0.045) 0%, transparent 70%)",
         }}
       />
 
-      <div className="w-full max-w-[1300px] mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
-        {/* ── HEADER EDITORIAL ── */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between mb-16 md:mb-20 gap-8">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
-          >
-            <div className="flex items-center gap-4 mb-6">
-              <div
-                style={{
-                  width: 24,
-                  height: 1.5,
-                  background: "rgba(210,110,135,0.8)",
-                }}
-              />
-              <span
-                className="font-sans font-semibold uppercase tracking-[0.25em]"
-                style={{ fontSize: "10px", color: "rgb(210,110,135)" }}
-              >
-                Colección Exclusiva
-              </span>
-            </div>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-80 bottom-0 h-[600px] w-[600px] rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(235,168,185,0.04) 0%, transparent 70%)",
+        }}
+      />
 
-            <h2
+      <div className="relative z-10 mx-auto w-full max-w-[1300px] px-5 sm:px-8 lg:px-12">
+        {/* =====================================================
+            HEADER
+        ====================================================== */}
+
+        <div className="mb-10 md:mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{
+              once: true,
+              margin: "-100px",
+            }}
+            transition={{
+              duration: 0.8,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
+            className="mb-5 flex items-center gap-4"
+          >
+            <span
+              className="block"
+              style={{
+                width: 24,
+                height: 1.5,
+                background: "rgb(210,110,135)",
+              }}
+            />
+
+            <span
+              className="font-sans font-semibold uppercase"
+              style={{
+                fontSize: "10px",
+                letterSpacing: "0.25em",
+                color: "rgb(210,110,135)",
+              }}
+            >
+              Portafolio
+            </span>
+          </motion.div>
+
+          <div className="flex items-end justify-between gap-8">
+            <motion.h2
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{
+                once: true,
+                margin: "-100px",
+              }}
+              transition={{
+                duration: 0.9,
+                delay: 0.04,
+                ease: [0.25, 0.46, 0.45, 0.94],
+              }}
               className="font-display font-light tracking-tight"
               style={{
                 fontSize: "clamp(2.4rem, 6vw, 4.5rem)",
-                lineHeight: 1.05,
-                color: "rgb(74, 36, 50)",
+                lineHeight: 1.04,
+                color: "rgb(74,36,50)",
               }}
             >
               Arte en cada{" "}
-              <em className="italic" style={{ color: "rgb(210,110,135)" }}>
+              <em
+                className="italic"
+                style={{
+                  color: "rgb(210,110,135)",
+                }}
+              >
                 detalle.
               </em>
-            </h2>
-          </motion.div>
+            </motion.h2>
 
-          {/* CTA SUPERIOR QUE LLEVA A LA PÁGINA INDEPENDIENTE */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            <Link
-              to="/portafolio"
-              className="group flex items-center justify-center gap-3 px-6 md:px-8 h-[48px] md:h-[50px] rounded-full transition-all duration-500 overflow-hidden relative"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgb(210,110,135) 0%, rgb(175,80,110) 100%)",
-                boxShadow:
-                  "0 8px 24px rgba(210,110,135,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
-              }}
-            >
-              <span
-                className="relative z-10 font-sans font-bold uppercase tracking-[0.18em]"
-                style={{ fontSize: "10.5px", color: "#ffffff" }}
-              >
-                Descubrir Portafolio Completo
-              </span>
-              <ArrowRight
-                className="relative z-10 w-4 h-4 transition-transform duration-500 group-hover:translate-x-1.5 text-white"
-                strokeWidth={2}
-              />
-            </Link>
-          </motion.div>
-        </div>
-
-        {/* ── MASONRY SNEAK PEEK (6 fotos máximo) ── */}
-        <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 md:gap-8 space-y-6 md:space-y-8">
-          {displayImages.map((img: any, index: number) => (
+            {/* CONTADOR EDITORIAL */}
             <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
+              initial={{ opacity: 0, x: 12 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
               transition={{
-                duration: 1,
-                delay: (index % 3) * 0.1, // Stagger effect
-                ease: [0.25, 0.46, 0.45, 0.94],
+                duration: 0.7,
+                delay: 0.15,
               }}
-              whileHover={{
-                y: -4,
-                boxShadow: "0 25px 60px rgba(210,110,135,0.15), inset 0 2px 10px rgba(255,255,255,0.9)",
-                borderColor: "rgba(235,168,185,0.5)",
-                transition: { duration: 0.4 }
-              }}
-              whileTap={{
-                scale: 0.98,
-                boxShadow: "0 10px 30px rgba(210,110,135,0.1), inset 0 2px 10px rgba(255,255,255,0.9)",
-                borderColor: "rgba(235,168,185,0.45)",
-                transition: { duration: 0.2 }
-              }}
-              className="break-inside-avoid relative overflow-hidden group rounded-[16px]"
-              style={{
-                border: "1px solid rgba(235,168,185,0.25)",
-                boxShadow:
-                  "0 10px 35px rgba(210,110,135,0.06), inset 0 2px 10px rgba(255,255,255,0.9)",
-                background: "linear-gradient(145deg, #ffffff 0%, #fff7f9 100%)",
-                transform: "translateZ(0)",
-              }}
+              className="hidden shrink-0 items-end gap-4 pb-2 sm:flex"
             >
-              <Link
-                to="/portafolio"
-                className="block relative w-full h-full overflow-hidden bg-[#fff5f7] rounded-[15px]"
-              >
-                <img
-                  src={img.url}
-                  alt={img.alt || img.category || "Maquillaje Karin"}
-                  className="w-full h-auto block"
-                  loading={index < 3 ? "eager" : "lazy"}
-                  decoding="async"
-                  fetchPriority={index === 0 ? "high" : "auto"}
-                />
+              <div className="flex flex-col items-end">
+                <div className="flex items-baseline gap-2">
+                  <span
+                    className="font-sans font-medium"
+                    style={{
+                      fontSize: "18px",
+                      lineHeight: 1,
+                      color: "rgb(210,110,135)",
+                    }}
+                  >
+                    {currentNumber}
+                  </span>
 
-                {/* OVERLAY EDITORIAL DE HOVER (Teasers) */}
+                  <span
+                    className="font-sans"
+                    style={{
+                      fontSize: "11px",
+                      color: "rgba(74,36,50,0.32)",
+                    }}
+                  >
+                    / {totalNumber}
+                  </span>
+                </div>
+
                 <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none flex flex-col justify-end p-6"
+                  className="mt-3 overflow-hidden"
                   style={{
-                    background:
-                      "linear-gradient(to top, rgba(255,248,250,0.96) 0%, rgba(255,255,255,0.1) 65%, transparent 100%)",
+                    width: 76,
+                    height: 1,
+                    background: "rgba(210,110,135,0.14)",
                   }}
                 >
-                  <div className="transform translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700 delay-100 ease-out flex flex-col items-center text-center pb-2">
-                    <div
-                      style={{ color: "rgb(210,110,135)", marginBottom: "8px" }}
-                    >
-                      {LuxuryIcons.sparkle}
-                    </div>
-                    <span
-                      className="block font-sans font-bold uppercase tracking-[0.2em]"
-                      style={{
-                        fontSize: "10px",
-                        color: "rgb(210,110,135)",
-                        marginBottom: "6px",
-                      }}
-                    >
-                      {img.category}
-                    </span>
-                    <span className="font-sans text-[10px] font-semibold tracking-widest text-[rgb(74,36,50)] uppercase opacity-70">
-                      Explorar galería →
-                    </span>
-                  </div>
+                  <motion.div
+                    animate={{
+                      width: `${((currentIndex + 1) / total) * 100}%`,
+                    }}
+                    transition={{
+                      duration: 0.55,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                    }}
+                    style={{
+                      height: "100%",
+                      background: "rgb(210,110,135)",
+                    }}
+                  />
                 </div>
-              </Link>
+              </div>
             </motion.div>
-          ))}
+          </div>
         </div>
 
-        {/* CTA INFERIOR PARA MÓVILES */}
-        <div className="mt-12 flex justify-center lg:hidden">
-          <Link
-            to="/portafolio"
-            className="font-sans text-[11px] font-bold uppercase tracking-[0.2em] text-[rgb(210,110,135)] border-b border-[rgba(210,110,135,0.4)] pb-1"
+        {/* =====================================================
+            CARRUSEL
+        ====================================================== */}
+
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 20,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            margin: "-80px",
+          }}
+          transition={{
+            duration: 0.9,
+            ease: [0.25, 0.46, 0.45, 0.94],
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          className="relative"
+        >
+          <div
+            className="relative overflow-hidden rounded-[20px] md:rounded-[24px]"
+            style={{
+              height: "clamp(300px, 38vw, 445px)",
+              background: "#f8eef1",
+              border: "1px solid rgba(210,110,135,0.16)",
+              boxShadow: "0 24px 65px rgba(74,36,50,0.075)",
+            }}
           >
-            Ver todas las transformaciones →
-          </Link>
-        </div>
+            <AnimatePresence
+              initial={false}
+              custom={direction}
+              mode="popLayout"
+            >
+              <motion.img
+                key={`${current.id ?? current.url}-${currentIndex}`}
+                src={current.url}
+                alt={current.alt || title}
+                custom={direction}
+                variants={{
+                  enter: (dir: number) => ({
+                    x: dir > 0 ? 45 : -45,
+                    opacity: 0,
+                    scale: 1.025,
+                  }),
+                  center: {
+                    x: 0,
+                    opacity: 1,
+                    scale: 1,
+                  },
+                  exit: (dir: number) => ({
+                    x: dir > 0 ? -45 : 45,
+                    opacity: 0,
+                    scale: 1.005,
+                  }),
+                }}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: {
+                    type: "spring",
+                    stiffness: 280,
+                    damping: 32,
+                  },
+                  opacity: {
+                    duration: 0.35,
+                  },
+                  scale: {
+                    duration: 0.7,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                  },
+                }}
+                drag="x"
+                dragConstraints={{
+                  left: 0,
+                  right: 0,
+                }}
+                dragElastic={0.8}
+                onDragEnd={(_, info) => {
+                  const swipe = swipePower(info.offset.x, info.velocity.x);
+
+                  if (swipe < -swipeConfidenceThreshold) {
+                    nextSlide();
+                  } else if (swipe > swipeConfidenceThreshold) {
+                    previousSlide();
+                  }
+                }}
+                className="absolute inset-0 h-full w-full cursor-grab select-none object-cover object-center active:cursor-grabbing"
+                draggable={false}
+              />
+            </AnimatePresence>
+
+            {/* OVERLAY */}
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(74,36,50,0.01) 35%, rgba(74,36,50,0.04) 52%, rgba(74,36,50,0.48) 100%)",
+              }}
+            />
+
+            {/* TINT ROSA */}
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(90deg, rgba(210,110,135,0.035), transparent 35%, transparent 70%, rgba(210,110,135,0.045))",
+              }}
+            />
+
+            {/* INFORMACIÓN SOBRE LA FOTO */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentIndex}
+                initial={{
+                  opacity: 0,
+                  y: 8,
+                }}
+                animate={{
+                  opacity: 1,
+                  y: 0,
+                }}
+                exit={{
+                  opacity: 0,
+                  y: -6,
+                }}
+                transition={{
+                  duration: 0.4,
+                }}
+                className="absolute bottom-7 left-7 right-7 md:bottom-8 md:left-8 md:right-8"
+              >
+                <span
+                  className="mb-2.5 block font-sans font-semibold uppercase"
+                  style={{
+                    fontSize: "9px",
+                    letterSpacing: "0.24em",
+                    color: "rgba(255,240,244,0.92)",
+                  }}
+                >
+                  {category}
+                </span>
+
+                <div className="flex items-end gap-4">
+                  <h3
+                    className="font-display font-light"
+                    style={{
+                      fontSize: "clamp(1.55rem, 3vw, 2.35rem)",
+                      lineHeight: 1.05,
+                      color: "#ffffff",
+                    }}
+                  >
+                    {title}
+                  </h3>
+
+                  <span
+                    className="mb-1.5 hidden h-px w-12 sm:block"
+                    style={{
+                      background: "rgba(255,255,255,0.75)",
+                    }}
+                  />
+                </div>
+              </motion.div>
+            </AnimatePresence>
+
+            {/* PAGINACIÓN SOBRE LA IMAGEN */}
+            {total > 1 && (
+              <div className="absolute bottom-7 left-1/2 z-20 hidden -translate-x-1/2 items-center gap-1 sm:flex">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    aria-label={`Ver trabajo ${index + 1}`}
+                    onClick={() => goToSlide(index)}
+                    className="flex h-5 items-center px-1"
+                  >
+                    <span
+                      className="block rounded-full transition-all duration-500"
+                      style={{
+                        width: index === currentIndex ? 24 : 6,
+                        height: 2,
+                        background:
+                          index === currentIndex
+                            ? "#ffffff"
+                            : "rgba(255,255,255,0.42)",
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* ===================================================
+              FLECHA ANTERIOR
+          ==================================================== */}
+
+          {total > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={previousSlide}
+                aria-label="Trabajo anterior"
+                className="group absolute left-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full transition-all duration-300 md:-left-5"
+                style={{
+                  background: "rgba(255,253,253,0.96)",
+                  border: "1px solid rgba(210,110,135,0.22)",
+                  color: "rgb(74,36,50)",
+                  boxShadow: "0 8px 25px rgba(74,36,50,0.10)",
+                  backdropFilter: "blur(10px)",
+                }}
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.background = "rgb(210,110,135)";
+                  event.currentTarget.style.color = "#ffffff";
+                  event.currentTarget.style.borderColor = "rgb(210,110,135)";
+                  event.currentTarget.style.boxShadow =
+                    "0 10px 28px rgba(210,110,135,0.24)";
+                }}
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.background =
+                    "rgba(255,253,253,0.96)";
+                  event.currentTarget.style.color = "rgb(74,36,50)";
+                  event.currentTarget.style.borderColor =
+                    "rgba(210,110,135,0.22)";
+                  event.currentTarget.style.boxShadow =
+                    "0 8px 25px rgba(74,36,50,0.10)";
+                }}
+              >
+                <ChevronLeft className="h-[17px] w-[17px]" strokeWidth={1.4} />
+              </button>
+
+              {/* FLECHA SIGUIENTE */}
+              <button
+                type="button"
+                onClick={nextSlide}
+                aria-label="Siguiente trabajo"
+                className="group absolute right-2 top-1/2 z-30 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full transition-all duration-300 md:-right-5"
+                style={{
+                  background: "rgb(210,110,135)",
+                  border: "1px solid rgb(210,110,135)",
+                  color: "#ffffff",
+                  boxShadow: "0 10px 30px rgba(210,110,135,0.24)",
+                }}
+                onMouseEnter={(event) => {
+                  event.currentTarget.style.background = "rgb(190,88,117)";
+                  event.currentTarget.style.boxShadow =
+                    "0 12px 32px rgba(210,110,135,0.32)";
+                }}
+                onMouseLeave={(event) => {
+                  event.currentTarget.style.background = "rgb(210,110,135)";
+                  event.currentTarget.style.boxShadow =
+                    "0 10px 30px rgba(210,110,135,0.24)";
+                }}
+              >
+                <ChevronRight className="h-[17px] w-[17px]" strokeWidth={1.4} />
+              </button>
+            </>
+          )}
+        </motion.div>
+
+        {/* =====================================================
+            CAPTION EDITORIAL
+        ====================================================== */}
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{
+              opacity: 0,
+              y: 6,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            exit={{
+              opacity: 0,
+              y: -6,
+            }}
+            transition={{
+              duration: 0.35,
+            }}
+            className="mt-5 border-b pb-6 md:mt-6 md:pb-7"
+            style={{
+              borderColor: "rgba(210,110,135,0.20)",
+            }}
+          >
+            <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+              {/* INFO */}
+
+              <div className="flex items-center gap-4 md:gap-7">
+                <span
+                  className="font-sans font-semibold uppercase"
+                  style={{
+                    fontSize: "9px",
+                    letterSpacing: "0.22em",
+                    color: "rgb(210,110,135)",
+                  }}
+                >
+                  {category}
+                </span>
+
+                <span
+                  className="h-4 w-px"
+                  style={{
+                    background: "rgba(210,110,135,0.25)",
+                  }}
+                />
+
+                <span
+                  className="font-display font-light"
+                  style={{
+                    fontSize: "clamp(1rem, 2vw, 1.25rem)",
+                    lineHeight: 1,
+                    color: "rgb(74,36,50)",
+                  }}
+                >
+                  {title}
+                </span>
+              </div>
+
+              {/* CTA EDITORIAL */}
+              <Link
+                to="/portafolio"
+                className="group relative flex w-fit items-center gap-3 py-2"
+              >
+                <span
+                  className="font-sans font-semibold uppercase"
+                  style={{
+                    fontSize: "9px",
+                    letterSpacing: "0.2em",
+                    color: "rgb(74,36,50)",
+                  }}
+                >
+                  Ver todos los trabajos
+                </span>
+
+                <ArrowRight
+                  className="h-[15px] w-[15px] transition-transform duration-300 group-hover:translate-x-1"
+                  strokeWidth={1.4}
+                  style={{
+                    color: "rgb(210,110,135)",
+                  }}
+                />
+
+                {/* Línea de hover */}
+                <span
+                  className="absolute bottom-0 left-0 h-px w-full origin-left scale-x-0 transition-transform duration-400 group-hover:scale-x-100"
+                  style={{
+                    background: "rgb(210,110,135)",
+                  }}
+                />
+              </Link>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+
+        {/* =====================================================
+            MOBILE COUNTER
+        ====================================================== */}
+
+        {total > 1 && (
+          <div className="mt-5 flex items-center justify-between sm:hidden">
+            <div className="flex items-baseline gap-2">
+              <span
+                className="font-sans font-medium"
+                style={{
+                  fontSize: "17px",
+                  color: "rgb(210,110,135)",
+                }}
+              >
+                {currentNumber}
+              </span>
+
+              <span
+                className="font-sans"
+                style={{
+                  fontSize: "10px",
+                  color: "rgba(74,36,50,0.4)",
+                }}
+              >
+                / {totalNumber}
+              </span>
+            </div>
+
+            <span
+              className="font-sans uppercase"
+              style={{
+                fontSize: "8px",
+                letterSpacing: "0.18em",
+                color: "rgba(210,110,135,0.65)",
+              }}
+            >
+              Desliza para explorar
+            </span>
+          </div>
+        )}
       </div>
     </section>
   );

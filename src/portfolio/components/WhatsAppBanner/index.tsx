@@ -1,54 +1,256 @@
 import { motion } from "framer-motion";
 
 export function WhatsAppBanner() {
-  const whatsappUrl = "https://wa.me/529990000000?text=Hola%20Karin,%20vi%20tu%20portafolio%20y%20me%20encantar%C3%ADa%20agendar%20una%20cita.";
+  const whatsappMessage =
+    "Hola Karin, vi tu portafolio y me encantaría agendar una cita.";
+
+  const whatsappUrl = `https://wa.me/529990000000?text=${encodeURIComponent(
+    whatsappMessage,
+  )}`;
+
+  const bannerImage = "public/images/portfolio/portfolio-whatsapp.jpg";
 
   return (
-    <section className="w-full py-16 md:py-20 relative overflow-hidden bg-[rgb(255,252,251)]">
-      {/* Luces y brillos rosados de fondo */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-[radial-gradient(ellipse,rgba(198,130,145,0.08)_0%,transparent_70%)] rounded-full pointer-events-none" />
-      
-      <div className="w-full max-w-[800px] mx-auto px-6 relative z-10 flex flex-col items-center text-center">
+    <section className="w-full bg-[#FCFBFA] px-5 py-12 sm:px-8 sm:py-14 lg:px-12 lg:py-16">
+      <div className="mx-auto w-full max-w-[1180px]">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 18 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={{
+            duration: 0.7,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          className="
+            group
+            relative
+            overflow-hidden
+            rounded-[24px]
+            border
+            border-[#472332]/[0.08]
+            bg-[#F3ECEE]
+            shadow-[0_16px_50px_rgba(74,36,50,0.07)]
+          "
         >
-          <span className="inline-block px-3 py-1 mb-6 rounded-full bg-[rgba(198,130,145,0.1)] border border-[rgba(198,130,145,0.2)] text-[rgb(175,100,118)] text-[9px] font-bold uppercase tracking-[0.25em]">
-            Tu turno de brillar
-          </span>
+          <div className="flex min-h-[300px] flex-col lg:flex-row">
+            {/* =====================================================
+                IMAGE
+            ===================================================== */}
 
-          <h2 className="font-display text-3xl md:text-4xl text-[rgb(74,36,50)] mb-4">
-            ¿Te gustó algún <em className="italic text-[rgb(198,130,145)]">estilo?</em>
-          </h2>
+            <div
+              className="
+                relative
+                h-[180px]
+                w-full
+                overflow-hidden
 
-          <p className="font-sans text-[13px] md:text-[14px] text-[rgba(74,36,50,0.65)] max-w-[450px] mx-auto leading-relaxed mb-8">
-            Agenda tu cita y recreemos un look pensado especialmente para resaltar tus facciones y personalidad.
-          </p>
+                sm:h-[210px]
 
-          <a 
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group relative inline-flex items-center justify-center gap-3 h-[50px] px-8 rounded-full bg-[rgb(198,130,145)] text-white font-sans text-[11px] font-bold tracking-[0.15em] uppercase overflow-hidden shadow-[0_8px_24px_rgba(198,130,145,0.35)] transition-all duration-300 hover:shadow-[0_12px_32px_rgba(198,130,145,0.5)] hover:-translate-y-1"
-          >
-            {/* Brillo en hover */}
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-[rgba(255,255,255,0.2)] to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-            
-            Escribir por WhatsApp
-            <svg 
-              className="w-4 h-4 group-hover:scale-110 transition-transform" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
+                lg:h-auto
+                lg:w-[35%]
+              "
             >
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-            </svg>
-          </a>
+              <img
+                src={bannerImage}
+                alt="Karin Makeup Artist"
+                className="
+                  h-full
+                  w-full
+                  object-cover
+                  object-center
+                  transition-transform
+                  duration-[1200ms]
+                  ease-[cubic-bezier(0.22,1,0.36,1)]
+                  group-hover:scale-[1.025]
+                "
+              />
+
+              <div
+                className="
+                  absolute
+                  inset-0
+                  bg-gradient-to-t
+                  from-[#472332]/20
+                  to-transparent
+                  lg:bg-gradient-to-r
+                  lg:from-transparent
+                  lg:to-[#F3ECEE]
+                "
+              />
+            </div>
+
+            {/* =====================================================
+                CONTENT
+            ===================================================== */}
+
+            <div
+              className="
+                flex
+                flex-1
+                items-center
+                justify-between
+                gap-8
+                px-7
+                py-8
+
+                sm:px-9
+                sm:py-9
+
+                lg:px-10
+                lg:py-8
+
+                xl:px-12
+              "
+            >
+              {/* TEXT */}
+
+              <div className="min-w-0">
+                <div className="mb-3 flex items-center gap-2.5">
+                  <span className="h-px w-6 bg-[#C96B85]" />
+
+                  <span
+                    className="
+                      font-sans
+                      text-[8px]
+                      font-semibold
+                      uppercase
+                      tracking-[0.24em]
+                      text-[#B64F70]
+                    "
+                  >
+                    Agenda tu experiencia
+                  </span>
+                </div>
+
+                <h2
+                  className="
+                    font-sans
+                    text-[30px]
+                    font-semibold
+                    leading-[1]
+                    tracking-[-0.055em]
+                    text-[#472332]
+
+                    sm:text-[34px]
+
+                    lg:text-[38px]
+                  "
+                >
+                  Tu próximo look.
+                  <span className="text-[#C96B85]"> Tu momento.</span>
+                </h2>
+
+                <p
+                  className="
+                    mt-3
+                    max-w-[480px]
+                    font-sans
+                    text-[12px]
+                    leading-[1.65]
+                    text-[#472332]/70
+
+                    sm:text-[13px]
+                  "
+                >
+                  Cuéntame qué tienes en mente y encontremos el maquillaje
+                  perfecto para tu ocasión.
+                </p>
+              </div>
+
+              {/* CTA */}
+
+              <div className="shrink-0">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+                    group/cta
+                    flex
+                    h-[50px]
+                    w-[230px]
+                    items-center
+                    justify-between
+                    rounded-full
+                    bg-[#472332]
+                    px-5
+
+                    font-sans
+                    text-[9px]
+                    font-bold
+                    uppercase
+                    tracking-[0.16em]
+                    text-white
+
+                    shadow-[0_8px_24px_rgba(74,36,50,0.14)]
+
+                    transition-all
+                    duration-300
+                    ease-[cubic-bezier(0.22,1,0.36,1)]
+
+                    hover:-translate-y-0.5
+                    hover:bg-[#562D3E]
+                    hover:shadow-[0_12px_30px_rgba(74,36,50,0.18)]
+                  "
+                >
+                  <span>Escribir por WhatsApp</span>
+
+                  <span
+                    className="
+                      flex
+                      h-7
+                      w-7
+                      items-center
+                      justify-center
+                      rounded-full
+                      bg-white
+                      text-[#472332]
+
+                      transition-transform
+                      duration-300
+                      group-hover/cta:scale-105
+                    "
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="
+                        h-[13px]
+                        w-[13px]
+                        transition-transform
+                        duration-300
+                        group-hover/cta:translate-x-0.5
+                        group-hover/cta:-translate-y-0.5
+                      "
+                    >
+                      <path d="M13 5h6v6" />
+                      <path d="M19 5 10 14" />
+                      <path d="M19 13v4a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4" />
+                    </svg>
+                  </span>
+                </a>
+
+                <p
+                  className="
+                    mt-2
+                    text-center
+                    font-sans
+                    text-[7px]
+                    font-medium
+                    uppercase
+                    tracking-[0.16em]
+                    text-[#472332]/45
+                  "
+                >
+                  Atención personalizada
+                </p>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     </section>

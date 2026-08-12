@@ -40,28 +40,33 @@ const fetchAllPublicData = async () => {
     
   if (sErr) throw new Error(`Services fetch failed: ${sErr.message}`);
 
-  // Fetch gallery from the new CMS
+  // Fetch gallery from the new CMS (ALL active projects for Portfolio)
   const { data: galleryItems, error: gErr } = await supabase
     .from('gallery_projects')
     .select('*')
     .eq('active', true)
-    .eq('is_favorite', true)
-    .order('display_order', { ascending: true })
-    .limit(6);
+    .order('display_order', { ascending: true });
 
   if (gErr) throw new Error(`Gallery fetch failed: ${gErr.message}`);
 
-  console.log("GALLERY DIAGNOSTIC:", {
-    galleryItems,
-    gErr,
-    query: "eq('active', true).limit(6)"
-  });
-
-  const gallery = (galleryItems || []).map((g: any) => ({
-    url: g.image_url?.replace(/^\/?public\//, '/') || '',
+  const fullGallery = (galleryItems || []).map((g: any) => ({
+    id: g.id,
+    title: g.title,
+    category: g.category,
+    image: g.image_url?.replace(/^\/?public\//, '/') || '',
+    url: g.image_url?.replace(/^\/?public\//, '/') || '', // For backwards compatibility in LandingBuilder
     alt: g.title || g.category || 'Galería',
-    category: g.category
+    featured: g.is_favorite,
+    description: g.description || '',
+    serviceType: g.category, // fallback for search
+    order: g.display_order,
+    createdAt: g.created_at
   }));
+
+  // Featured gallery for the Landing Page (only favorites, max 6)
+  const featuredGallery = fullGallery
+    .filter((g: any) => g.featured)
+    .slice(0, 6);
 
   // Fetch basic review metrics (for rating & trust)
   const { data: reviews, error: rErr } = await supabase
@@ -99,7 +104,7 @@ const fetchAllPublicData = async () => {
     status: 'published'
   };
 
-  return { workspace, landing: safeLanding, services: services || [], gallery, reviews: reviews || [], metrics };
+  return { workspace, landing: safeLanding, services: services || [], gallery: featuredGallery, fullGallery, reviews: reviews || [], metrics };
 };
 
 export function usePublicContent() {
@@ -146,11 +151,12 @@ export function usePublicContent() {
   const models = useMemo(() => {
     if (!rawData) return null;
 
-    const { workspace, landing, services, gallery, reviews, metrics } = rawData;
+    const { workspace, landing, services, gallery, fullGallery, reviews, metrics } = rawData;
     const siteUrl = import.meta.env.VITE_SITE_URL || 'https://karinmakeup.com';
 
     return {
       landing: LandingBuilder.build(workspace, landing, services, gallery, reviews, metrics),
+      fullGallery,
       seo: SeoBuilder.build(workspace, siteUrl),
       theme: ThemeBuilder.build(workspace),
       business: BusinessContextBuilder.build(workspace, services, metrics),

@@ -1,199 +1,191 @@
-import { motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { ServiceExtended } from "../../domains/workspace/types/WorkspaceEntities";
 
-// Imágenes premium
+/* -------------------------------------------------------------------------- */
+/* SERVICE MEDIA                                                              */
+/* -------------------------------------------------------------------------- */
+
 const SERVICE_IMAGES: Record<string, string> = {
-  novia: "/images/portfolio/work3.jpeg",
-  xv: "https://images.unsplash.com/photo-1629814696209-4f4faf2ab874?q=85&w=1000&auto=format&fit=crop&crop=faces",
-  social:
-    "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=85&w=1000&auto=format&fit=crop",
-  "fotos xv":
-    "https://images.unsplash.com/photo-1512496015851-a1cbfd383921?q=85&w=1000&auto=format&fit=crop",
-  "fotos xv acompañamiento":
-    "https://images.unsplash.com/photo-1526413232644-8a40f4110398?q=85&w=1000&auto=format&fit=crop",
-  graduacion:
-    "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?q=85&w=1000&auto=format&fit=crop&crop=faces",
-  artistico:
-    "https://images.unsplash.com/photo-1509631179647-0c91af23f733?q=85&w=1000&auto=format&fit=crop",
-  sesiones:
-    "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=85&w=1000&auto=format&fit=crop",
-  peinados:
-    "https://images.unsplash.com/photo-1620331311520-246422fd82f9?q=85&w=1000&auto=format&fit=crop",
+  novia: "/images/services/novia.jpg",
+
+  xv: "/images/services/xv.jpg",
+
+  social: "/images/services/social.jpg",
+
+  "fotos xv": "/images/services/fotos-xv.jpg",
+
+  "fotos xv acompañamiento": "/images/services/fotos-acompañamiento.jpg",
+
+  graduacion: "/images/services/graduacion.jpg",
+
+  artistico: "/images/services/artistico.jpg",
+
+  sesiones: "/images/services/sesion-fotografica.jpg",
+
+  peinados: "/images/services/peinados.jpg",
 };
 
 const DEFAULT_SERVICE_IMAGE =
-  "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=85&w=1000&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1522337660859-02fbefca4702?q=85&w=1400&auto=format&fit=crop";
 
-function getServiceImage(searchKey: string): string {
-  return SERVICE_IMAGES[searchKey] || DEFAULT_SERVICE_IMAGE;
+/* -------------------------------------------------------------------------- */
+/* HELPERS                                                                    */
+/* -------------------------------------------------------------------------- */
+
+function normalizeAssetUrl(url?: string | null) {
+  if (!url) return "";
+
+  return url.startsWith("public/") ? `/${url.slice(7)}` : url;
 }
+
+function normalizeKey(value?: string | null) {
+  return (value || "")
+    .toLowerCase()
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function resolveServiceKey(service: Partial<ServiceExtended>) {
+  const text = normalizeKey(
+    [
+      service.category,
+      service.slug,
+      service.name,
+      service.short_name,
+      service.landing_title_top,
+      service.landing_title_bottom,
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
+
+  if (text.includes("acompanamiento") && text.includes("xv")) {
+    return "fotos xv acompañamiento";
+  }
+
+  if (text.includes("sesion") && text.includes("xv")) {
+    return "fotos xv";
+  }
+
+  if (text.includes("novia")) {
+    return "novia";
+  }
+
+  if (text.includes("social")) {
+    return "social";
+  }
+
+  if (text.includes("gradu")) {
+    return "graduacion";
+  }
+
+  if (text.includes("artist")) {
+    return "artistico";
+  }
+
+  if (text.includes("peinado") || text.includes("estilismo")) {
+    return "peinados";
+  }
+
+  if (text.includes("sesion") || text.includes("fotograf")) {
+    return "sesiones";
+  }
+
+  if (text.includes("xv")) {
+    return "xv";
+  }
+
+  return normalizeKey(service.slug) || "default";
+}
+
+function getServiceImage(service: any) {
+  return (
+    SERVICE_IMAGES[service.searchKey] ||
+    normalizeAssetUrl(service.cover_image) ||
+    DEFAULT_SERVICE_IMAGE
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* NAVIGATION LABELS                                                          */
+/* -------------------------------------------------------------------------- */
+
+function getNavigationLabel(service: any, searchKey: string) {
+  const labels: Record<string, string> = {
+    novia: "Novia",
+    social: "Social",
+    xv: "XV Años",
+    "fotos xv": "Sesión de Fotos XV",
+    "fotos xv acompañamiento": "Sesión + Acompañamiento",
+    graduacion: "Graduaciones",
+    artistico: "Artístico",
+    sesiones: "Sesiones Fotográficas",
+    peinados: "Estilismo",
+  };
+
+  return labels[searchKey] || service.short_name || service.name || "Servicio";
+}
+
+/* -------------------------------------------------------------------------- */
+/* FALLBACK CONTENT                                                           */
+/* -------------------------------------------------------------------------- */
 
 const LUXURY_CONTENT: Record<
   string,
-  { description: string; capsules: any[]; duration: string }
+  {
+    description: string;
+    duration: string;
+  }
 > = {
   novia: {
     description:
       "Diseñado para que luzcas impecable durante el día más importante de tu vida.",
-    capsules: [
-      {
-        title: "Luminosidad eterna",
-        subtitle: "Acabado fotográfico HD",
-        icon: "sparkle",
-      },
-      {
-        title: "Piel perfecta 16 h",
-        subtitle: "Resistente a lágrimas y emociones",
-        icon: "heart",
-      },
-    ],
     duration: "210 min",
   },
+
   social: {
     description:
       "Ideal para fiestas, eventos y celebraciones donde quieras destacar.",
-    capsules: [
-      {
-        title: "Elegancia nocturna superior",
-        subtitle: "Mirada y piel de lujo",
-        icon: "moon",
-      },
-      {
-        title: "Fijación absoluta",
-        subtitle: "Intacto hasta el final",
-        icon: "sparkle",
-      },
-    ],
     duration: "120 min",
   },
+
   xv: {
     description:
       "Un maquillaje fresco, elegante y resistente para disfrutar toda tu noche.",
-    capsules: [
-      {
-        title: "Brillo juvenil y frescura",
-        subtitle: "Resalta tu belleza natural",
-        icon: "flower",
-      },
-      {
-        title: "Larga duración garantizada",
-        subtitle: "Disfruta sin preocuparte",
-        icon: "sparkle",
-      },
-    ],
     duration: "120 min",
   },
+
   "fotos xv": {
     description: "Acabado profesional diseñado para cámaras, luces y video.",
-    capsules: [
-      {
-        title: "Preparación e hidratación de la piel",
-        subtitle: "Para un acabado natural y radiante.",
-        icon: "sparkle",
-      },
-      {
-        title: "Maquillaje especial para fotografía",
-        subtitle: "Técnicas que favorecen la iluminación y la cámara.",
-        icon: "camera",
-      },
-      {
-        title: "Pestañas de tira y sellado profesional",
-        subtitle: "Mayor definición y larga duración.",
-        icon: "heart",
-      },
-    ],
     duration: "180 min",
   },
+
   "fotos xv acompañamiento": {
     description:
       "Retoques y cambios durante toda tu sesión para un resultado impecable.",
-    capsules: [
-      {
-        title: "Maquillaje profesional fotográfico",
-        subtitle: "Acabado perfecto para fotografía y video.",
-        icon: "camera",
-      },
-      {
-        title: "Acompañamiento en sesión",
-        subtitle: "Retoques cuando sean necesarios.",
-        icon: "lipstick",
-      },
-      {
-        title: "Cambios de maquillaje (opcional)",
-        subtitle: "Segundo look sin costo adicional.",
-        icon: "sparkle",
-      },
-      {
-        title: "Ajustes de labios, piel y pestañas",
-        subtitle: "Cada fotografía debe verse impecable.",
-        icon: "heart",
-      },
-    ],
     duration: "Variable",
   },
+
   graduacion: {
     description: "Luce radiante en cada fotografía, abrazo y celebración.",
-    capsules: [
-      {
-        title: "Personalización total",
-        subtitle: "Diseñado para tus facciones.",
-        icon: "sparkle",
-      },
-      {
-        title: "Duración garantizada",
-        subtitle: "Piel perfecta por horas.",
-        icon: "heart",
-      },
-    ],
     duration: "120 min",
   },
+
   artistico: {
     description:
       "Caracterización profesional para proyectos creativos y eventos especiales.",
-    capsules: [
-      {
-        title: "Personalización total",
-        subtitle: "Diseñado para tus facciones.",
-        icon: "palette",
-      },
-      {
-        title: "Productos profesionales",
-        subtitle: "Body paint y efectos especiales.",
-        icon: "sparkle",
-      },
-    ],
     duration: "220 min",
   },
+
   sesiones: {
     description: "Acabado profesional diseñado para cámaras, luces y video.",
-    capsules: [
-      {
-        title: "Preparación para fotografía",
-        subtitle: "Acabado optimizado para cámara.",
-        icon: "camera",
-      },
-      {
-        title: "Larga duración",
-        subtitle: "Perfecto durante toda la sesión.",
-        icon: "sparkle",
-      },
-    ],
     duration: "150 min",
   },
+
   peinados: {
     description: "El complemento perfecto para un look completo y armonioso.",
-    capsules: [
-      {
-        title: "Personalización total",
-        subtitle: "Peinado acorde a tu estilo.",
-        icon: "scissors",
-      },
-      {
-        title: "Acabado profesional",
-        subtitle: "Diseñado para durar durante todo el evento.",
-        icon: "sparkle",
-      },
-    ],
     duration: "180 min",
   },
 };
@@ -201,579 +193,1207 @@ const LUXURY_CONTENT: Record<
 const DEFAULT_CONTENT = {
   description:
     "Un servicio diseñado para revelar y elevar tu belleza más auténtica, cuidando cada detalle para brindarte una experiencia premium.",
-  capsules: [
-    {
-      title: "Acabado premium",
-      subtitle: "Técnica internacional",
-      icon: "sparkle",
-    },
-    {
-      title: "Larga duración",
-      subtitle: "Piel perfecta por horas",
-      icon: "heart",
-    },
-  ],
   duration: "Consultar",
 };
 
-const LuxuryIcons = {
-  sparkle: (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-  ),
-  heart: (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  ),
-  moon: (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-  ),
-  flower: (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" />
-    </svg>
-  ),
-  camera: (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-      <circle cx="12" cy="13" r="4" />
-    </svg>
-  ),
-  lipstick: (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M8 7V3h8v4M8 11h8M8 15h8M10 7v14M14 7v14M6 21h12" />
-    </svg>
-  ),
-  palette: (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="13.5" cy="6.5" r=".5" />
-      <circle cx="17.5" cy="10.5" r=".5" />
-      <circle cx="8.5" cy="7.5" r=".5" />
-      <circle cx="6.5" cy="12.5" r=".5" />
-      <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.992 6.012 17.5 2 12 2z" />
-    </svg>
-  ),
-  scissors: (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="6" cy="6" r="3" />
-      <circle cx="6" cy="18" r="3" />
-      <line x1="20" y1="4" x2="8.12" y2="15.88" />
-      <line x1="14.47" y1="14.48" x2="20" y2="20" />
-      <line x1="8.12" y1="8.12" x2="12" y2="12" />
-    </svg>
-  ),
-  clock: (
-    <svg
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  ),
-};
+/* -------------------------------------------------------------------------- */
+/* SERVICE ITEM TYPE                                                          */
+/* -------------------------------------------------------------------------- */
 
-const FINAL_SERVICES = {
-  eyebrow: "Colección Exclusiva",
-  title: "Servicios diseñados para",
-  italicWord: "enamorar.",
-  items: [
-    {
-      id: "1",
-      searchKey: "novia",
-      titleTop: "Maquillaje de",
-      titleBottom: "Novia",
-      price_from: 2100,
-      is_featured: true,
-    },
-    {
-      id: "2",
-      searchKey: "social",
-      titleTop: "Maquillaje",
-      titleBottom: "Social",
-      price_from: 800,
-    },
-    {
-      id: "3",
-      searchKey: "xv",
-      titleTop: "Maquillaje para",
-      titleBottom: "XV Años",
-      price_from: 1000,
-    },
-    {
-      id: "4",
-      searchKey: "fotos xv",
-      titleTop: "Sesión Fotográfica",
-      titleBottom: "XV Años",
-      price_from: 1200,
-    },
-    {
-      id: "5",
-      searchKey: "fotos xv acompañamiento",
-      titleTop: "Sesión Fotográfica",
-      titleBottom: "+ Acompañamiento",
-      price_from: 1850,
-    },
-    {
-      id: "6",
-      searchKey: "graduacion",
-      titleTop: "Maquillaje de",
-      titleBottom: "Graduación",
-      price_from: 700,
-    },
-    {
-      id: "7",
-      searchKey: "artistico",
-      titleTop: "Maquillaje",
-      titleBottom: "Artístico",
-      price_from: 1200,
-    },
-    {
-      id: "8",
-      searchKey: "sesiones",
-      titleTop: "Sesiones",
-      titleBottom: "Fotográficas",
-      price_from: 950,
-    },
-    {
-      id: "9",
-      searchKey: "peinados",
-      titleTop: "Peinados y",
-      titleBottom: "Estilismo",
-      price_from: 600,
-    },
-  ],
-};
+interface ServiceItem {
+  id: string;
+  searchKey: string;
+  navigationLabel: string;
+
+  titleTop: string;
+  titleBottom: string;
+
+  price_from?: number | null;
+  is_featured?: boolean;
+
+  category?: string | null;
+  short_description?: string | null;
+  description?: string | null;
+
+  features?: unknown[] | null;
+  duration_minutes?: number | null;
+
+  active?: boolean;
+  show_in_landing?: boolean;
+
+  [key: string]: unknown;
+}
 
 interface ServicesProps {
   services?: ServiceExtended[];
 }
 
+/* -------------------------------------------------------------------------- */
+/* FALLBACK SERVICES                                                          */
+/* -------------------------------------------------------------------------- */
+
+const FINAL_SERVICES: ServiceItem[] = [
+  {
+    id: "1",
+    searchKey: "novia",
+    navigationLabel: "Novia",
+    titleTop: "Maquillaje de",
+    titleBottom: "Novia",
+    price_from: 2100,
+    is_featured: true,
+  },
+
+  {
+    id: "2",
+    searchKey: "social",
+    navigationLabel: "Social",
+    titleTop: "Maquillaje",
+    titleBottom: "Social",
+    price_from: 800,
+  },
+
+  {
+    id: "3",
+    searchKey: "xv",
+    navigationLabel: "XV Años",
+    titleTop: "Maquillaje para",
+    titleBottom: "XV Años",
+    price_from: 1000,
+  },
+
+  {
+    id: "4",
+    searchKey: "fotos xv",
+    navigationLabel: "Sesión de Fotos XV",
+    titleTop: "Sesión Fotográfica",
+    titleBottom: "XV Años",
+    price_from: 1200,
+  },
+
+  {
+    id: "5",
+    searchKey: "fotos xv acompañamiento",
+    navigationLabel: "Sesión + Acompañamiento",
+    titleTop: "Sesión Fotográfica",
+    titleBottom: "+ Acompañamiento",
+    price_from: 1850,
+  },
+
+  {
+    id: "6",
+    searchKey: "graduacion",
+    navigationLabel: "Graduaciones",
+    titleTop: "Maquillaje de",
+    titleBottom: "Graduación",
+    price_from: 700,
+  },
+
+  {
+    id: "7",
+    searchKey: "artistico",
+    navigationLabel: "Artístico",
+    titleTop: "Maquillaje",
+    titleBottom: "Artístico",
+    price_from: 1200,
+  },
+
+  {
+    id: "8",
+    searchKey: "sesiones",
+    navigationLabel: "Sesiones Fotográficas",
+    titleTop: "Sesiones",
+    titleBottom: "Fotográficas",
+    price_from: 950,
+  },
+
+  {
+    id: "9",
+    searchKey: "peinados",
+    navigationLabel: "Estilismo",
+    titleTop: "Peinados y",
+    titleBottom: "Estilismo",
+    price_from: 600,
+  },
+];
+
+function Arrow({ direction = "right" }: { direction?: "left" | "right" }) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.35"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`pointer-events-none ${
+        direction === "left" ? "rotate-180" : ""
+      }`}
+      aria-hidden="true"
+    >
+      <path d="M5 12h14" />
+      <path d="m13 6 6 6-6 6" />
+    </svg>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* SERVICES                                                                   */
+/* -------------------------------------------------------------------------- */
+
 export default function Services({ services = [] }: ServicesProps) {
-  const mappedServices = services
-    .filter((service) => service.active !== false && service.show_in_landing !== false)
-    .map((service) => {
-      const searchKey =
-        service.category?.toLowerCase().trim() ||
-        service.slug?.toLowerCase().trim() ||
-        "";
+  const [activeIndex, setActiveIndex] = useState(0);
 
-      return {
-        ...service,
-        id: service.id,
-        searchKey,
-        titleTop:
-          service.landing_title_top || service.short_name || service.name,
-        titleBottom: service.landing_title_bottom || "",
-        price_from: service.price_from,
-        is_featured: service.featured,
-      };
+  /* Navegación horizontal */
+  const navigationRef = useRef<HTMLDivElement | null>(null);
+
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  /* ------------------------------------------------------------------------ */
+  /* CMS SERVICES                                                             */
+  /* ------------------------------------------------------------------------ */
+
+  const items = useMemo<ServiceItem[]>(() => {
+    const cmsServices = services
+      .filter(
+        (service) =>
+          service.active !== false && service.show_in_landing !== false,
+      )
+      .map((service) => {
+        const searchKey = resolveServiceKey(service);
+
+        return {
+          ...service,
+
+          id: service.id,
+
+          searchKey,
+
+          navigationLabel: getNavigationLabel(service, searchKey),
+
+          titleTop:
+            service.landing_title_top || service.short_name || service.name,
+
+          titleBottom: service.landing_title_bottom || "",
+
+          price_from: service.price_from,
+
+          is_featured: service.featured,
+        };
+      });
+
+    return cmsServices.length ? cmsServices : FINAL_SERVICES;
+  }, [services]);
+
+  /* ------------------------------------------------------------------------ */
+  /* SAFE INDEX                                                               */
+  /* ------------------------------------------------------------------------ */
+
+  const safeIndex = Math.min(activeIndex, Math.max(items.length - 1, 0));
+
+  const service = items[safeIndex];
+
+  const content = LUXURY_CONTENT[service?.searchKey] || DEFAULT_CONTENT;
+
+  /* ------------------------------------------------------------------------ */
+  /* NAVIGATION SCROLL STATE                                                  */
+  /* ------------------------------------------------------------------------ */
+
+  const updateScrollState = useCallback(() => {
+    const element = navigationRef.current;
+
+    if (!element) return;
+
+    const maxScroll = element.scrollWidth - element.clientWidth;
+
+    setCanScrollLeft(element.scrollLeft > 4);
+
+    setCanScrollRight(element.scrollLeft < maxScroll - 4);
+  }, []);
+
+  useEffect(() => {
+    updateScrollState();
+
+    const element = navigationRef.current;
+
+    if (!element) return;
+
+    const handleScroll = () => {
+      updateScrollState();
+    };
+
+    const handleResize = () => {
+      updateScrollState();
+    };
+
+    element.addEventListener("scroll", handleScroll, { passive: true });
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      element.removeEventListener("scroll", handleScroll);
+
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [items.length, updateScrollState]);
+
+  /* ------------------------------------------------------------------------ */
+  /* KEEP ACTIVE SERVICE VISIBLE                                              */
+  /* ------------------------------------------------------------------------ */
+
+  useEffect(() => {
+    const container = navigationRef.current;
+
+    if (!container) return;
+
+    const activeButton = container.querySelector<HTMLElement>(
+      `[data-service-index="${safeIndex}"]`,
+    );
+
+    if (!activeButton) return;
+
+    // Move only the Services navigation. Do not use scrollIntoView(),
+    // because it can also scroll the document horizontally.
+    const containerRect = container.getBoundingClientRect();
+    const buttonRect = activeButton.getBoundingClientRect();
+
+    const leftOverflow = buttonRect.left - containerRect.left;
+    const rightOverflow = buttonRect.right - containerRect.right;
+
+    if (leftOverflow < 0) {
+      container.scrollBy({
+        left: leftOverflow - 24,
+        behavior: "smooth",
+      });
+    } else if (rightOverflow > 0) {
+      container.scrollBy({
+        left: rightOverflow + 24,
+        behavior: "smooth",
+      });
+    }
+
+    window.setTimeout(updateScrollState, 350);
+  }, [safeIndex, updateScrollState]);
+
+  /* ------------------------------------------------------------------------ */
+  /* NAVIGATION SCROLL                                                        */
+  /* ------------------------------------------------------------------------ */
+
+  const scrollNavigation = (direction: "left" | "right") => {
+    const element = navigationRef.current;
+
+    if (!element) return;
+
+    const amount = Math.max(element.clientWidth * 0.72, 280);
+
+    element.scrollBy({
+      left: direction === "right" ? amount : -amount,
+
+      behavior: "smooth",
     });
-
-  const data = {
-    ...FINAL_SERVICES,
-    items: mappedServices.length > 0 ? mappedServices : FINAL_SERVICES.items,
   };
+
+  /* ------------------------------------------------------------------------ */
+  /* MOUSE WHEEL → HORIZONTAL SCROLL                                          */
+  /* ------------------------------------------------------------------------ */
+
+  const handleNavigationWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    const element = navigationRef.current;
+
+    if (!element) return;
+
+    if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
+      return;
+    }
+
+    const maxScrollLeft = element.scrollWidth - element.clientWidth;
+
+    if (maxScrollLeft <= 0) {
+      return;
+    }
+
+    const currentScrollLeft = element.scrollLeft;
+    const delta = event.deltaY;
+
+    const movingRight = delta > 0;
+    const movingLeft = delta < 0;
+
+    const canMoveRight = currentScrollLeft < maxScrollLeft - 1;
+    const canMoveLeft = currentScrollLeft > 1;
+
+    // Consume the wheel only while the Services bar can move horizontally.
+    // At either edge, release the event so the page keeps normal vertical
+    // scrolling instead of appearing to move sideways.
+    if ((movingRight && canMoveRight) || (movingLeft && canMoveLeft)) {
+      event.preventDefault();
+
+      element.scrollLeft = Math.max(
+        0,
+        Math.min(maxScrollLeft, currentScrollLeft + delta),
+      );
+
+      updateScrollState();
+    }
+  };
+
+  /* ------------------------------------------------------------------------ */
+  /* SERVICE CONTROLS                                                         */
+  /* ------------------------------------------------------------------------ */
+
+  const next = () => {
+    setActiveIndex((current) => (current + 1) % items.length);
+  };
+
+  const previous = () => {
+    setActiveIndex((current) => (current - 1 + items.length) % items.length);
+  };
+
+  /* ------------------------------------------------------------------------ */
+  /* EMPTY STATE                                                              */
+  /* ------------------------------------------------------------------------ */
+
+  if (!service) return null;
+
+  /* ------------------------------------------------------------------------ */
+  /* RENDER                                                                   */
+  /* ------------------------------------------------------------------------ */
 
   return (
     <section
       id="servicios"
-      className="relative w-full py-28 md:py-36 overflow-hidden"
-      style={{ backgroundColor: "rgb(255, 254, 253)" }}
+      className="relative w-full max-w-full overflow-x-clip overflow-y-visible bg-[#fffefd] py-24 md:py-32"
     >
+      {/* Ambientación rosa */}
       <div
-        className="absolute top-0 right-[-10%] w-[800px] h-[800px] rounded-full pointer-events-none opacity-50"
+        className="pointer-events-none absolute -right-56 top-16 h-[620px] w-[620px] rounded-full opacity-70"
         style={{
           background:
-            "radial-gradient(circle, rgba(235,168,185,0.06) 0%, transparent 70%)",
-        }}
-      />
-      <div
-        className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] rounded-full pointer-events-none opacity-40"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(235,168,185,0.04) 0%, transparent 70%)",
+            "radial-gradient(circle, rgba(210,110,135,0.075) 0%, rgba(210,110,135,0) 68%)",
         }}
       />
 
-      <div className="w-full max-w-[1300px] mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
-        <div className="flex flex-col items-start text-left mb-16 md:mb-20 max-w-2xl">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.9, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="flex items-center gap-4 mb-6"
-          >
-            <div
-              style={{
-                width: 24,
-                height: 1.5,
-                background: "rgba(210,110,135,0.8)",
-              }}
-            />
-            <span
-              className="font-sans font-semibold uppercase tracking-[0.25em]"
-              style={{ fontSize: "10px", color: "rgb(210,110,135)" }}
-            >
-              {data.eyebrow}
-            </span>
-          </motion.div>
+      <div className="relative z-10 mx-auto w-full max-w-[1300px] px-5 sm:px-8 lg:px-12">
+        {/* ------------------------------------------------------------------ */}
+        {/* HEADER                                                             */}
+        {/* ------------------------------------------------------------------ */}
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{
-              duration: 1,
-              delay: 0.1,
-              ease: [0.25, 0.46, 0.45, 0.94],
-            }}
-            className="font-display font-light tracking-tight mb-6"
-            style={{
-              fontSize: "clamp(2.4rem, 6.5vw, 4.5rem)",
-              lineHeight: 1.05,
-              color: "rgb(74, 36, 50)",
-            }}
-          >
-            {data.title}{" "}
-            <em className="italic" style={{ color: "rgb(210,110,135)" }}>
-              {data.italicWord}
-            </em>
-          </motion.h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 md:gap-8 xl:gap-10 items-stretch">
-          {data.items.map((service: any, index: number) => {
-            const content =
-              LUXURY_CONTENT[service.searchKey] || DEFAULT_CONTENT;
-
-            return (
-              <motion.div
-                key={service.id}
-                initial={{ opacity: 0, y: 25 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{
-                  duration: 1,
-                  delay: index * 0.1,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-                whileHover={{
-                  y: -6,
-                  boxShadow:
-                    "0 35px 70px rgba(210,110,135,0.18), inset 0 2px 10px rgba(255,255,255,0.9)",
-                  borderColor: "rgba(235,168,185,0.55)",
-                  transition: { duration: 0.4 },
-                }}
-                whileTap={{
-                  scale: 0.98,
-                  boxShadow:
-                    "0 10px 30px rgba(210,110,135,0.1), inset 0 2px 10px rgba(255,255,255,0.9)",
-                  borderColor: "rgba(235,168,185,0.45)",
-                  transition: { duration: 0.2 },
-                }}
-                className="group relative flex flex-col h-full bg-white overflow-hidden rounded-[16px]"
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 18,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            margin: "-100px",
+          }}
+          transition={{
+            duration: 0.8,
+          }}
+          className="mb-10 flex flex-col gap-7 md:mb-12 md:flex-row md:items-end md:justify-between"
+        >
+          <div>
+            <div className="mb-5 flex items-center gap-4">
+              <span
+                className="h-px w-6"
                 style={{
-                  background:
-                    "linear-gradient(145deg, #ffffff 0%, #fff7f9 100%)",
-                  border: "1px solid rgba(235,168,185,0.3)",
-                  boxShadow:
-                    "0 10px 35px rgba(210,110,135,0.06), inset 0 2px 10px rgba(255,255,255,0.9)",
+                  backgroundColor: "rgb(210,110,135)",
+                }}
+              />
+
+              <span
+                className="font-sans font-semibold uppercase"
+                style={{
+                  color: "rgb(210,110,135)",
+                  fontSize: 10,
+                  letterSpacing: "0.28em",
                 }}
               >
-                {/* 1. ZONA FOTOGRÁFICA */}
-                <div className="relative w-full aspect-[16/11] overflow-hidden bg-[#fff5f7] flex-shrink-0">
-                  <img
-                    src={service.cover_image ? service.cover_image.replace(/^\/?public\//, '/') : getServiceImage(service.searchKey)}
-                    alt={`${service.titleTop} ${service.titleBottom}`}
-                    className="w-full h-full object-cover object-[center_20%]"
-                    style={{
-                      transition:
-                        "transform 2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = "scale(1.05)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = "scale(1)";
-                    }}
-                    loading="lazy"
-                  />
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background:
-                        "linear-gradient(to top, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 25%)",
-                    }}
-                  />
+                Servicios
+              </span>
+            </div>
 
-                  {service.is_featured && (
-                    <div className="absolute top-4 right-4 pointer-events-none">
-                      <div
-                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full"
+            <h2
+              className="font-display font-light tracking-[-0.035em]"
+              style={{
+                color: "rgb(74,36,50)",
+                fontSize: "clamp(2.7rem, 5.8vw, 4.8rem)",
+                lineHeight: 0.98,
+              }}
+            >
+              Experiencias creadas
+              <br />
+              <em
+                style={{
+                  color: "rgb(210,110,135)",
+                }}
+              >
+                para ti.
+              </em>
+            </h2>
+          </div>
+
+          {/* Contador general */}
+        </motion.div>
+
+        {/* ================================================================== */}
+        {/* SERVICE NAVIGATION                                                 */}
+        {/* ================================================================== */}
+
+        <motion.div
+          initial={{
+            opacity: 0,
+            y: 15,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+            margin: "-80px",
+          }}
+          transition={{
+            duration: 0.7,
+            delay: 0.08,
+          }}
+          className="mb-10"
+        >
+          {/* Navigation header */}
+          <div className="mb-5 flex items-end justify-between gap-6">
+            <div>
+              <span
+                className="font-sans font-semibold uppercase"
+                style={{
+                  color: "rgb(210,110,135)",
+                  fontSize: 10,
+                  letterSpacing: "0.22em",
+                }}
+              >
+                Explora
+              </span>
+
+              <p
+                className="mt-2 font-display"
+                style={{
+                  color: "rgb(74,36,50)",
+                  fontSize: "clamp(1.45rem, 2.4vw, 2rem)",
+                  lineHeight: 1.05,
+                }}
+              >
+                Todos nuestros servicios
+              </p>
+            </div>
+
+            {/* Desktop helper */}
+            <div className="hidden items-center gap-4 sm:flex">
+              <span
+                className="font-sans uppercase"
+                style={{
+                  color: "rgba(74,36,50,0.52)",
+                  fontSize: 9,
+                  fontWeight: 600,
+                  letterSpacing: "0.16em",
+                }}
+              >
+                Selecciona un servicio
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation shell */}
+          <div className="relative">
+            {/* Left fade */}
+            <motion.div
+              animate={{
+                opacity: canScrollLeft ? 1 : 0,
+              }}
+              className="pointer-events-none absolute left-0 top-0 z-20 h-full w-16"
+              style={{
+                background:
+                  "linear-gradient(90deg, #fffefd 5%, rgba(255,254,253,0) 100%)",
+              }}
+            />
+
+            {/* Right fade */}
+            <motion.div
+              animate={{
+                opacity: canScrollRight ? 1 : 0,
+              }}
+              className="pointer-events-none absolute right-0 top-0 z-20 h-full w-16"
+              style={{
+                background:
+                  "linear-gradient(270deg, #fffefd 5%, rgba(255,254,253,0) 100%)",
+              }}
+            />
+
+            {/* Left scroll button */}
+            <motion.button
+              type="button"
+              aria-label="Ver servicios anteriores"
+              onClick={() => scrollNavigation("left")}
+              animate={{
+                opacity: canScrollLeft ? 1 : 0,
+                scale: canScrollLeft ? 1 : 0.9,
+              }}
+              className="absolute left-0 top-1/2 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border bg-white/90 text-[rgb(74,36,50)] shadow-[0_8px_25px_rgba(74,36,50,0.08)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white hover:text-[rgb(74,36,50)] hover:shadow-[0_12px_30px_rgba(74,36,50,0.14)] sm:flex"
+              style={{
+                borderColor: "rgba(74,36,50,0.14)",
+                color: "rgb(74,36,50)",
+              }}
+            >
+              <Arrow direction="left" />
+            </motion.button>
+
+            {/* Right scroll button */}
+            <motion.button
+              type="button"
+              aria-label="Ver más servicios"
+              onClick={() => scrollNavigation("right")}
+              animate={{
+                opacity: canScrollRight ? 1 : 0,
+                scale: canScrollRight ? 1 : 0.9,
+              }}
+              className="absolute right-0 top-1/2 z-30 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border bg-white/90 text-[rgb(74,36,50)] shadow-[0_8px_25px_rgba(74,36,50,0.08)] backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white hover:text-[rgb(74,36,50)] hover:shadow-[0_12px_30px_rgba(74,36,50,0.14)] sm:flex"
+              style={{
+                borderColor: "rgba(74,36,50,0.14)",
+                color: "rgb(74,36,50)",
+              }}
+            >
+              <Arrow />
+            </motion.button>
+
+            {/* Horizontal navigation */}
+            <div
+              ref={navigationRef}
+              onWheel={handleNavigationWheel}
+              className="flex min-w-0 max-w-full items-stretch gap-2 overflow-x-auto overflow-y-hidden scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              style={{
+                overscrollBehaviorX: "contain",
+                overscrollBehaviorY: "auto",
+                WebkitOverflowScrolling: "touch",
+                touchAction: "pan-x",
+              }}
+            >
+              {items.map((item, index) => {
+                const isActive = index === safeIndex;
+
+                return (
+                  <motion.button
+                    key={item.id}
+                    type="button"
+                    data-service-index={index}
+                    onClick={() => setActiveIndex(index)}
+                    whileHover={{
+                      y: -2,
+                    }}
+                    whileTap={{
+                      scale: 0.98,
+                    }}
+                    className="group relative flex min-h-[62px] shrink-0 items-center gap-3 rounded-[16px] px-5 text-left transition-all duration-300"
+                    style={{
+                      backgroundColor: isActive
+                        ? "#d95f86"
+                        : "rgba(255,255,255,0.88)",
+
+                      border: `1px solid ${
+                        isActive ? "#ccc" : "rgba(74,36,50,0.16)"
+                      }`,
+
+                      boxShadow: isActive
+                        ? "0 12px 28px rgba(74,36,50,0.14)"
+                        : "0 4px 14px rgba(74,36,50,0.025)",
+                    }}
+                  >
+                    {/* Label */}
+                    <span
+                      className="font-sans"
+                      style={{
+                        color: isActive ? "#fff" : "rgb(74,36,50)",
+
+                        fontSize: 11,
+
+                        fontWeight: 600,
+
+                        letterSpacing: "0.035em",
+
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {item.navigationLabel}
+                    </span>
+
+                    {/* Active indicator */}
+                    {isActive && (
+                      <motion.span
+                        layoutId="service-active-indicator"
+                        className="absolute bottom-0 left-5 right-5 h-[2px] rounded-full"
                         style={{
-                          background:
-                            "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,245,248,0.95) 100%)",
-                          backdropFilter: "blur(8px)",
-                          border: "1px solid rgba(255,255,255,1)",
-                          boxShadow: "0 4px 15px rgba(210,110,135,0.15)",
+                          backgroundColor: "rgb(210,110,135)",
                         }}
-                      >
-                        <span className="text-[10px]">✨</span>
+                      />
+                    )}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Navigation progress */}
+          <div className="mt-3 flex items-center gap-3">
+            <div
+              className="h-[2px] flex-1 overflow-hidden rounded-full"
+              style={{
+                backgroundColor: "rgba(74,36,50,0.08)",
+              }}
+            >
+              <motion.div
+                animate={{
+                  width: `${((safeIndex + 1) / items.length) * 100}%`,
+                }}
+                transition={{
+                  duration: 0.45,
+                  ease: "easeOut",
+                }}
+                className="h-full rounded-full"
+                style={{
+                  backgroundColor: "rgb(210,110,135)",
+                }}
+              />
+            </div>
+
+            <span
+              className="shrink-0 font-sans font-semibold"
+              style={{
+                color: "rgba(74,36,50,0.62)",
+                fontSize: 14,
+              }}
+            >
+              {safeIndex + 1} de {items.length}
+            </span>
+          </div>
+
+          {/* Mobile discovery hint */}
+          <div className="mt-3 flex items-center justify-between sm:hidden">
+            <span
+              className="font-sans uppercase"
+              style={{
+                color: "rgba(74,36,50,0.48)",
+                fontSize: 8.5,
+                fontWeight: 600,
+                letterSpacing: "0.13em",
+              }}
+            >
+              Desliza para explorar
+            </span>
+
+            <span
+              className="flex items-center gap-2 font-sans uppercase"
+              style={{
+                color: "rgb(210,110,135)",
+                fontSize: 8.5,
+                fontWeight: 600,
+                letterSpacing: "0.13em",
+              }}
+            >
+              Más servicios
+              <Arrow />
+            </span>
+          </div>
+        </motion.div>
+
+        {/* ================================================================== */}
+        {/* FEATURED SERVICE STAGE                                             */}
+        {/* ================================================================== */}
+
+        <div className="relative">
+          <div
+            className="overflow-hidden rounded-[26px] border"
+            style={{
+              borderColor: "rgba(210,110,135,0.18)",
+
+              backgroundColor: "#f8f2f3",
+
+              boxShadow: "0 24px 70px rgba(74,36,50,0.07)",
+            }}
+          >
+            <div className="grid lg:grid-cols-[1.18fr_0.82fr]">
+              {/* ============================================================ */}
+              {/* IMAGE                                                        */}
+              {/* ============================================================ */}
+
+              <div className="group relative min-h-[390px] overflow-hidden md:min-h-[510px] lg:min-h-[590px]">
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={`${service.id}-image`}
+                    src={getServiceImage(service)}
+                    alt={`${service.titleTop} ${service.titleBottom}`}
+                    initial={{
+                      opacity: 0,
+                      scale: 1.035,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      scale: 1,
+                    }}
+                    exit={{
+                      opacity: 0,
+                    }}
+                    transition={{
+                      duration: 0.65,
+                      ease: [0.25, 0.46, 0.45, 0.94],
+                    }}
+                    className="absolute inset-0 h-full w-full object-cover object-center"
+                  />
+                </AnimatePresence>
+
+                {/* Overlay */}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(42,20,28,0.02) 35%, rgba(42,20,28,0.58) 100%)",
+                  }}
+                />
+
+                {/* Image copy */}
+                <div className="absolute bottom-7 left-7 right-7 md:bottom-9 md:left-9">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={`${service.id}-image-copy`}
+                      initial={{
+                        opacity: 0,
+                        y: 12,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: -8,
+                      }}
+                      transition={{
+                        duration: 0.45,
+                      }}
+                    >
+                      <div className="mb-3 flex items-center gap-3">
                         <span
-                          className="font-sans text-[8.5px] font-bold tracking-[0.2em] uppercase"
-                          style={{ color: "rgb(210,110,135)" }}
+                          className="h-px w-7"
+                          style={{
+                            backgroundColor: "rgba(255,255,255,0.8)",
+                          }}
+                        />
+
+                        <span
+                          className="font-sans font-semibold uppercase"
+                          style={{
+                            color: "rgba(255,255,255,0.88)",
+                            fontSize: 9,
+                            letterSpacing: "0.24em",
+                          }}
                         >
-                          Favorito
+                          {service.category || "Experiencia Karin"}
                         </span>
                       </div>
-                    </div>
-                  )}
-                </div>
 
-                {/* 2. CONTENIDO EDITORIAL */}
-                <div className="flex flex-col flex-1 p-7 md:p-8 z-10 relative">
-                  <div
-                    className="absolute inset-0 pointer-events-none opacity-60"
-                    style={{
-                      background:
-                        "radial-gradient(circle at 50% 0%, rgba(255,255,255,0.9) 0%, transparent 60%)",
-                    }}
-                  />
-
-                  <div className="relative h-full flex flex-col">
-                    {/* TÍTULO EDITORIAL (Doble jerarquía, jamás se corta) */}
-                    <div className="flex flex-col mb-4">
-                      <span
-                        className="font-display italic"
+                      <h3
+                        className="font-display font-light"
                         style={{
-                          color: "rgb(74, 36, 50)", // Color vino
-                          fontSize: "1.4rem",
-                          lineHeight: 1.1,
-                          fontWeight: 400,
+                          color: "#fff",
+                          fontSize: "clamp(2rem, 4vw, 3.5rem)",
+                          lineHeight: 0.98,
+                          letterSpacing: "-0.025em",
                         }}
                       >
                         {service.titleTop}
-                      </span>
-                      <span
-                        className="font-sans uppercase"
-                        style={{
-                          color: "rgb(210, 110, 135)", // Rosa elegante
-                          fontSize: "1.1rem",
-                          fontWeight: 600,
-                          letterSpacing: "0.02em",
-                          lineHeight: 1.2,
-                          marginTop: "2px",
-                        }}
-                      >
-                        {service.titleBottom}
-                      </span>
-                    </div>
 
-                    <div
+                        {service.titleBottom && (
+                          <>
+                            <br />
+
+                            <em>{service.titleBottom}</em>
+                          </>
+                        )}
+                      </h3>
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+
+                {/* Featured badge */}
+                {service.is_featured && (
+                  <div className="absolute right-6 top-6">
+                    <span
+                      className="inline-flex items-center gap-2 rounded-full px-4 py-2 font-sans font-semibold uppercase"
                       style={{
-                        width: "20px",
-                        height: "1.5px",
-                        background: "rgb(210,110,135)",
-                        marginBottom: "16px",
-                        borderRadius: "2px",
+                        backgroundColor: "rgba(255,255,255,0.9)",
+
+                        color: "rgb(180,78,106)",
+
+                        fontSize: 8.5,
+
+                        letterSpacing: "0.18em",
+
+                        backdropFilter: "blur(12px)",
+
+                        boxShadow: "0 8px 25px rgba(30,10,18,0.12)",
+                      }}
+                    >
+                      <span>✦</span>
+                      Selección Karin
+                    </span>
+                  </div>
+                )}
+
+                {/* Carousel controls — ultra-minimal Apple-style */}
+                <div className="absolute bottom-7 right-7 z-30 flex items-center gap-2 md:bottom-9 md:right-9">
+                  {/* Previous */}
+                  <button
+                    type="button"
+                    onClick={previous}
+                    aria-label="Servicio anterior"
+                    className="
+      group relative
+      flex h-11 w-11 items-center justify-center
+      rounded-full
+      overflow-hidden
+      text-[#2c292b]
+      transition-all duration-500
+      ease-[cubic-bezier(0.22,1,0.36,1)]
+      hover:scale-[1.045]
+      active:scale-[0.96]
+      sm:h-12 sm:w-12
+    "
+                    style={{
+                      background: "rgba(255,255,255,0.72)",
+                      boxShadow:
+                        "0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.08)",
+                      backdropFilter: "blur(20px) saturate(180%)",
+                      WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                    }}
+                  >
+                    {/* subtle material highlight */}
+                    <span
+                      className="
+        pointer-events-none
+        absolute inset-0
+        rounded-full
+        opacity-0
+        transition-opacity duration-500
+        group-hover:opacity-100
+      "
+                      style={{
+                        background:
+                          "linear-gradient(145deg, rgba(255,255,255,0.42), rgba(255,255,255,0.08))",
                       }}
                     />
 
-                    {/* DESCRIPCIÓN (Máximo 2 líneas garantizadas por copy) */}
-                    <p
-                      className="font-sans font-normal mb-8"
-                      style={{
-                        fontSize: "13.5px",
-                        lineHeight: 1.6,
-                        color: "rgba(74, 36, 50, 0.85)",
-                        letterSpacing: "0.01em",
-                      }}
-                    >
-                      {content.description}
-                    </p>
+                    <span className="relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-x-[2px]">
+                      <Arrow direction="left" />
+                    </span>
+                  </button>
 
-                    {/* BENEFICIOS (Cápsulas) */}
-                    <div className="flex flex-col gap-2.5 mb-8">
-                      {content.capsules.map((capsule, cIndex) => (
-                        <motion.div
-                          key={cIndex}
-                          className="flex items-center gap-3.5 p-3.5 rounded-xl"
-                          whileHover={{
-                            y: -1,
-                            boxShadow: "0 6px 15px rgba(210,110,135,0.1)",
-                            borderColor: "rgba(235,168,185,0.5)",
-                          }}
-                          whileTap={{
-                            scale: 0.98,
-                            boxShadow: "0 2px 8px rgba(210,110,135,0.05)",
-                          }}
+                  {/* Next */}
+                  <button
+                    type="button"
+                    onClick={next}
+                    aria-label="Siguiente servicio"
+                    className="
+      group relative
+      flex h-11 w-11 items-center justify-center
+      rounded-full
+      overflow-hidden
+      text-[#2c292b]
+      transition-all duration-500
+      ease-[cubic-bezier(0.22,1,0.36,1)]
+      hover:scale-[1.045]
+      active:scale-[0.96]
+      sm:h-12 sm:w-12
+    "
+                    style={{
+                      background: "rgba(255,255,255,0.72)",
+                      boxShadow:
+                        "0 1px 2px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.08)",
+                      backdropFilter: "blur(20px) saturate(180%)",
+                      WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                    }}
+                  >
+                    {/* subtle material highlight */}
+                    <span
+                      className="
+        pointer-events-none
+        absolute inset-0
+        rounded-full
+        opacity-0
+        transition-opacity duration-500
+        group-hover:opacity-100
+      "
+                      style={{
+                        background:
+                          "linear-gradient(145deg, rgba(255,255,255,0.42), rgba(255,255,255,0.08))",
+                      }}
+                    />
+
+                    <span className="relative z-10 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[2px]">
+                      <Arrow />
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* ============================================================ */}
+              {/* INFORMATION                                                  */}
+              {/* ============================================================ */}
+
+              <div className="flex flex-col justify-between bg-[#fffafb] p-7 md:p-10 lg:p-12">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={service.id}
+                    initial={{
+                      opacity: 0,
+                      x: 15,
+                    }}
+                    animate={{
+                      opacity: 1,
+                      x: 0,
+                    }}
+                    exit={{
+                      opacity: 0,
+                      x: -10,
+                    }}
+                    transition={{
+                      duration: 0.45,
+                    }}
+                    className="flex h-full flex-col"
+                  >
+                    <div>
+                      <span
+                        className="font-sans font-semibold uppercase"
+                        style={{
+                          color: "rgb(210,110,135)",
+
+                          fontSize: 9,
+
+                          letterSpacing: "0.25em",
+                        }}
+                      >
+                        {service.category || "Servicio"}
+                      </span>
+
+                      <h4
+                        className="mt-4 font-display font-light"
+                        style={{
+                          color: "rgb(74,36,50)",
+
+                          fontSize: "clamp(2rem, 3.4vw, 3.15rem)",
+
+                          lineHeight: 0.98,
+
+                          letterSpacing: "-0.025em",
+                        }}
+                      >
+                        {service.titleTop}
+
+                        {service.titleBottom && (
+                          <>
+                            <br />
+
+                            <em
+                              style={{
+                                color: "rgb(210,110,135)",
+                              }}
+                            >
+                              {service.titleBottom}
+                            </em>
+                          </>
+                        )}
+                      </h4>
+
+                      <div
+                        className="my-7 h-px w-full"
+                        style={{
+                          backgroundColor: "rgba(74,36,50,0.1)",
+                        }}
+                      />
+
+                      <p
+                        className="max-w-[430px] font-sans"
+                        style={{
+                          color: "rgba(74,36,50,0.72)",
+
+                          fontSize: 14,
+
+                          lineHeight: 1.75,
+                        }}
+                      >
+                        {service.short_description ||
+                          service.description ||
+                          content.description}
+                      </p>
+
+                      {/* ==================================================== */}
+                      {/* WHAT IS INCLUDED                                     */}
+                      {/* ==================================================== */}
+
+                      <div className="mt-8">
+                        <span
+                          className="font-sans font-semibold uppercase"
                           style={{
-                            background:
-                              "linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(255,247,250,0.8) 100%)",
-                            border: "1px solid rgba(235,168,185,0.3)",
-                            boxShadow: "0 2px 12px rgba(210,110,135,0.04)",
+                            color: "rgba(74,36,50,0.48)",
+
+                            fontSize: 9,
+
+                            letterSpacing: "0.18em",
                           }}
                         >
-                          <div
-                            className="flex-shrink-0 flex items-center justify-center w-8 h-8 rounded-full"
-                            style={{
-                              background:
-                                "linear-gradient(135deg, rgba(255,255,255,1), rgba(252,242,245,1))",
-                              color: "rgb(210,110,135)",
-                              boxShadow: "0 2px 6px rgba(210,110,135,0.08)",
-                              border: "1px solid rgba(235,168,185,0.2)",
-                            }}
-                          >
-                            {/* @ts-ignore */}
-                            {LuxuryIcons[capsule.icon] || LuxuryIcons.sparkle}
-                          </div>
-                          <div className="flex flex-col">
-                            <span
-                              className="font-sans font-semibold"
-                              style={{
-                                fontSize: "12px",
-                                letterSpacing: "0.01em",
-                                color: "rgb(74, 36, 50)",
-                              }}
-                            >
-                              {capsule.title}
-                            </span>
-                            <span
-                              className="font-sans font-normal"
-                              style={{
-                                fontSize: "11px",
-                                color: "rgba(74, 36, 50, 0.7)",
-                                marginTop: "1px",
-                              }}
-                            >
-                              {capsule.subtitle}
-                            </span>
-                          </div>
-                        </motion.div>
-                      ))}
+                          Incluye
+                        </span>
+
+                        <div className="mt-4 space-y-4">
+                          {(Array.isArray(service.features) &&
+                          service.features.length
+                            ? service.features
+                            : []
+                          ).map((feature: any, index: number) => {
+                            const title =
+                              typeof feature === "string"
+                                ? feature
+                                : feature?.title ||
+                                  feature?.name ||
+                                  feature?.label ||
+                                  "";
+
+                            if (!title) {
+                              return null;
+                            }
+
+                            return (
+                              <div
+                                key={`${service.id}-feature-${index}`}
+                                className="flex items-start gap-4"
+                              >
+                                <span
+                                  className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full"
+                                  style={{
+                                    backgroundColor: "rgb(210,110,135)",
+                                  }}
+                                />
+
+                                <span
+                                  className="font-sans"
+                                  style={{
+                                    color: "rgb(74,36,50)",
+                                    fontSize: 12.5,
+                                    lineHeight: 1.45,
+                                  }}
+                                >
+                                  {title}
+                                </span>
+                              </div>
+                            );
+                          })}
+
+                          {/* Fallback */}
+                          {!(
+                            Array.isArray(service.features) &&
+                            service.features.length
+                          ) && (
+                            <>
+                              <div className="flex items-start gap-4">
+                                <span
+                                  className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full"
+                                  style={{
+                                    backgroundColor: "rgb(210,110,135)",
+                                  }}
+                                />
+
+                                <span
+                                  className="font-sans"
+                                  style={{
+                                    color: "rgb(74,36,50)",
+                                    fontSize: 12.5,
+                                  }}
+                                >
+                                  Acabado premium
+                                </span>
+                              </div>
+
+                              <div className="flex items-start gap-4">
+                                <span
+                                  className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full"
+                                  style={{
+                                    backgroundColor: "rgb(210,110,135)",
+                                  }}
+                                />
+
+                                <span
+                                  className="font-sans"
+                                  style={{
+                                    color: "rgb(74,36,50)",
+                                    fontSize: 12.5,
+                                  }}
+                                >
+                                  Técnica profesional
+                                </span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    {/* ZONA DE CIERRE (mt-auto) */}
-                    <div className="mt-auto flex flex-col relative z-10">
-                      {/* PRECIO Y DURACIÓN */}
-                      <div className="flex items-end justify-between mb-5">
-                        <div className="flex flex-col gap-0.5">
+                    {/* ====================================================== */}
+                    {/* SERVICE FOOTER                                        */}
+                    {/* ====================================================== */}
+
+                    <div className="mt-10">
+                      <div className="mb-6 flex items-end justify-between gap-5">
+                        <div>
                           <span
                             className="font-sans font-semibold uppercase"
                             style={{
-                              fontSize: "9.5px",
-                              letterSpacing: "0.22em",
-                              color: "rgb(210,110,135)",
+                              color: "rgba(74,36,50,0.45)",
+
+                              fontSize: 8.5,
+
+                              letterSpacing: "0.2em",
                             }}
                           >
                             Inversión desde
                           </span>
-                          <div className="flex items-baseline gap-1.5">
+
+                          <div className="mt-1 flex items-baseline gap-2">
                             <span
                               className="font-display"
                               style={{
-                                fontSize: "2.6rem",
-                                color: "rgb(74, 36, 50)",
-                                fontWeight: 500,
-                                letterSpacing: "-0.02em",
+                                color: "rgb(74,36,50)",
+
+                                fontSize: "clamp(2rem, 4vw, 2.8rem)",
+
                                 lineHeight: 1,
                               }}
                             >
                               {service.price_from
-                                ? `$${service.price_from}`
+                                ? `$${Number(service.price_from).toLocaleString(
+                                    "es-MX",
+                                  )}`
                                 : "Consultar"}
                             </span>
+
                             {service.price_from && (
                               <span
-                                className="font-sans font-medium"
+                                className="font-sans"
                                 style={{
-                                  fontSize: "10px",
-                                  color: "rgba(74, 36, 50, 0.5)",
+                                  color: "rgba(74,36,50,0.42)",
+
+                                  fontSize: 9,
+
+                                  letterSpacing: "0.12em",
                                 }}
                               >
                                 MXN
@@ -782,96 +1402,154 @@ export default function Services({ services = [] }: ServicesProps) {
                           </div>
                         </div>
 
-                        {/* Duración */}
-                        {content.duration && (
-                          <div className="flex items-center gap-1.5 pb-1 opacity-75">
-                            {LuxuryIcons.clock}
-                            <span
-                              className="font-sans font-medium"
-                              style={{
-                                fontSize: "11.5px",
-                                color: "rgb(74, 36, 50)",
-                              }}
-                            >
-                              {content.duration}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* BOTÓN CTA IMPOSIBLE DE IGNORAR */}
-                      <div className="flex flex-col items-center">
-                        <motion.a
-                          href="#contacto"
-                          className="group flex items-center justify-center w-full relative overflow-hidden"
-                          whileHover={{
-                            y: -2,
-                            background:
-                              "linear-gradient(135deg, rgb(225,125,150) 0%, rgb(190,95,125) 100%)",
-                            boxShadow:
-                              "0 12px 32px rgba(210,110,135,0.45), inset 0 1px 0 rgba(255,255,255,0.3)",
-                          }}
-                          whileTap={{
-                            scale: 0.97,
-                            background:
-                              "linear-gradient(135deg, rgb(200,100,125) 0%, rgb(165,70,100) 100%)",
-                            boxShadow:
-                              "0 4px 16px rgba(210,110,135,0.25), inset 0 1px 0 rgba(255,255,255,0.15)",
-                          }}
-                          style={{
-                            height: "56px",
-                            borderRadius: "10px",
-                            background:
-                              "linear-gradient(135deg, rgb(210,110,135) 0%, rgb(175,80,110) 100%)",
-                            color: "rgb(255, 255, 255)",
-                            fontFamily: "Inter, sans-serif",
-                            fontSize: "12.5px",
-                            fontWeight: 600,
-                            letterSpacing: "0.15em",
-                            textTransform: "uppercase",
-                            textDecoration: "none",
-                            boxShadow:
-                              "0 8px 24px rgba(210,110,135,0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
-                            border: "1px solid rgba(225,125,150,0.5)",
-                          }}
-                        >
-                          <span className="relative z-10 flex items-center gap-2.5">
-                            Reservar experiencia
-                            <svg
-                              width="18"
-                              height="18"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              className="transition-transform duration-500 group-hover:translate-x-1.5"
-                            >
-                              <line x1="5" y1="12" x2="19" y2="12"></line>
-                              <polyline points="12 5 19 12 12 19"></polyline>
-                            </svg>
-                          </span>
-                        </motion.a>
-
-                        <div className="flex items-center gap-1.5 mt-3.5 opacity-85">
-                          <span className="text-[10.5px]">✨</span>
+                        <div className="text-right">
                           <span
                             className="font-sans font-semibold uppercase"
                             style={{
-                              fontSize: "9.5px",
-                              letterSpacing: "0.12em",
-                              color: "rgba(74, 36, 50, 0.85)",
+                              color: "rgba(74,36,50,0.38)",
+
+                              fontSize: 8.5,
+
+                              letterSpacing: "0.18em",
                             }}
                           >
-                            Atención completamente personalizada
+                            Duración
                           </span>
+
+                          <div
+                            className="mt-1 font-sans"
+                            style={{
+                              color: "rgb(74,36,50)",
+                              fontSize: 11,
+                            }}
+                          >
+                            {service.duration_minutes
+                              ? `${service.duration_minutes} min`
+                              : content.duration}
+                          </div>
                         </div>
                       </div>
+
+                      {/* CTA — Apple inspired */}
+                      <a
+                        href={`/reservar?service=${encodeURIComponent(service.id)}`}
+                        className="
+    group relative
+    flex h-[56px] w-full
+    items-center justify-center
+    overflow-hidden
+    rounded-full
+    px-7
+
+    bg-gradient-to-r
+from-[#9E3F61]
+via-[#B84F72]
+to-[#8F3456]
+    text-white
+
+    font-admin-sans
+    text-[14px]
+    font-medium
+    tracking-[-0.01em]
+
+    transition-all
+    duration-500
+    ease-[cubic-bezier(0.22,1,0.36,1)]
+
+    hover:-translate-y-[2px]
+    hover:shadow-[0_16px_36px_rgba(74,23,43,0.28)]
+
+    active:translate-y-0
+    active:scale-[0.985]
+  "
+                      >
+                        {/* Reflejo sutil */}
+                        <span
+                          aria-hidden="true"
+                          className="
+      pointer-events-none
+      absolute inset-0
+      rounded-full
+      opacity-0
+      transition-opacity
+      duration-500
+      group-hover:opacity-100
+    "
+                          style={{
+                            background:
+                              "linear-gradient(115deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 42%, rgba(255,255,255,0.07) 100%)",
+                          }}
+                        />
+
+                        {/* Contenido */}
+                        <span className="relative z-10 flex items-center gap-2">
+                          <span>Cotizar</span>
+
+                          <span
+                            className="
+        flex items-center
+        transition-transform
+        duration-500
+        ease-[cubic-bezier(0.22,1,0.36,1)]
+        group-hover:translate-x-1
+      "
+                          >
+                            <Arrow />
+                          </span>
+                        </span>
+                      </a>
+
+                      <div className="mt-4 text-center">
+                        <span
+                          className="font-sans uppercase"
+                          style={{
+                            color: "rgb(74,36,50)",
+
+                            fontSize: 9,
+
+                            letterSpacing: "0.18em",
+                          }}
+                        >
+                          Atención completamente personalizada
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+          </div>
+
+          {/* ================================================================ */}
+          {/* CTA SECONDARY                                                     */}
+          {/* ================================================================ */}
+
+          <div
+            className="mt-8 flex items-center justify-between border-t pt-6"
+            style={{
+              borderColor: "rgba(74,36,50,0.12)",
+            }}
+          >
+            <a
+              href="#servicios"
+              className="group ml-auto flex items-center gap-3 font-sans font-semibold uppercase"
+              style={{
+                color: "rgb(74,36,50)",
+                fontSize: 10,
+                letterSpacing: "0.16em",
+              }}
+            >
+              Ver todos los servicios
+              <span
+                className="transition-transform duration-300 group-hover:translate-x-1"
+                style={{
+                  color: "rgb(210,110,135)",
+                }}
+              >
+                <Arrow />
+              </span>
+            </a>
+          </div>
         </div>
       </div>
     </section>

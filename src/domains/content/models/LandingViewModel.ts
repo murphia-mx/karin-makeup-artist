@@ -62,7 +62,15 @@ export interface ServicesModel {
 }
 
 export interface GalleryModel {
-  images: { url: string; alt: string; category?: string }[];
+  images: { 
+    id: string; 
+    url: string; 
+    image: string; 
+    alt: string; 
+    category?: string; 
+    title?: string; 
+    description?: string 
+  }[];
   isVisible: boolean;
 }
 

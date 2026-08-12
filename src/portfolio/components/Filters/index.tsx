@@ -1,7 +1,13 @@
 import type { PortfolioCategory } from "../../types";
 
 const CATEGORIES: PortfolioCategory[] = [
-  "Todas", "Novias", "Social", "XV Años", "Graduación", "Editorial", "Artístico"
+  "Todas",
+  "Novias",
+  "Social",
+  "XV Años",
+  "Graduación",
+  "Editorial",
+  "Artístico",
 ];
 
 interface Props {
@@ -11,27 +17,97 @@ interface Props {
 
 export function PortfolioFilters({ activeCategory, onCategoryChange }: Props) {
   return (
-    <div className="flex flex-wrap items-center gap-3 md:gap-4">
-      {CATEGORIES.map((cat) => {
-        const isActive = activeCategory === cat;
+    <div className="flex w-full items-center gap-3 overflow-x-auto py-1.5 scrollbar-none sm:flex-wrap">
+      {CATEGORIES.map((category) => {
+        const isActive = activeCategory === category;
+
         return (
           <button
-            key={cat}
-            onClick={() => onCategoryChange(cat)}
+            key={category}
+            type="button"
+            onClick={() => onCategoryChange(category)}
             className={`
-              relative px-6 md:px-8 py-3 rounded-full font-sans text-[11px] md:text-[12px] font-medium tracking-[0.1em] transition-all duration-400
-              ${isActive 
-                ? "text-white shadow-[0_8px_20px_rgba(198,130,145,0.3)] -translate-y-[2px]" 
-                : "text-[rgba(74,36,50,0.7)] hover:text-[rgb(74,36,50)] bg-white border border-[rgba(198,130,145,0.25)] shadow-[0_2px_8px_rgba(198,130,145,0.04)] hover:shadow-[0_6px_16px_rgba(198,130,145,0.1)] hover:border-[rgba(198,130,145,0.4)]"
+              group
+              relative
+              flex
+              min-h-[46px]
+              shrink-0
+              items-center
+              justify-center
+              rounded-full
+              px-6
+              sm:px-7
+              font-sans
+              text-[12px]
+              font-medium
+              tracking-[-0.01em]
+              outline-none
+              transition-all
+              duration-300
+              ease-[cubic-bezier(0.22,1,0.36,1)]
+              focus-visible:ring-2
+              focus-visible:ring-[#c96a84]/35
+              focus-visible:ring-offset-2
+              ${
+                isActive
+                  ? `
+                    bg-[#472332]
+                    text-white
+                    shadow-[0_7px_22px_rgba(74,36,50,0.18)]
+                    hover:-translate-y-[1px]
+                    hover:bg-[#563040]
+                    hover:shadow-[0_10px_28px_rgba(74,36,50,0.22)]
+                  `
+                  : `
+                    border
+                    border-[#472332]/[0.12]
+                    bg-white
+                    text-[#472332]/65
+                    shadow-[0_2px_10px_rgba(74,36,50,0.035)]
+                    hover:-translate-y-[2px]
+                    hover:border-[#c96a84]/35
+                    hover:bg-[#fffafb]
+                    hover:text-[#472332]
+                    hover:shadow-[0_8px_24px_rgba(74,36,50,0.09)]
+                  `
               }
             `}
           >
-            {/* Fondo activo (Gradiente rosa elegante, no neón) */}
+            {/* Highlight interno del estado activo */}
             {isActive && (
-              <span className="absolute inset-0 bg-gradient-to-r from-[rgb(218,150,165)] to-[rgb(198,130,145)] rounded-full -z-10" />
+              <span
+                aria-hidden="true"
+                className="
+                  pointer-events-none
+                  absolute
+                  inset-[1px]
+                  rounded-full
+                  opacity-70
+                "
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgba(255,255,255,0.08), transparent 55%)",
+                }}
+              />
             )}
-            
-            {cat}
+
+            {/* Punto de estado */}
+            {isActive && (
+              <span
+                className="
+                  relative
+                  z-10
+                  mr-2
+                  h-1.5
+                  w-1.5
+                  rounded-full
+                  bg-[#e9a7b8]
+                  shadow-[0_0_10px_rgba(233,167,184,0.45)]
+                "
+              />
+            )}
+
+            <span className="relative z-10 whitespace-nowrap">{category}</span>
           </button>
         );
       })}
