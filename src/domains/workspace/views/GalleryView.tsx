@@ -6,6 +6,11 @@ import {
   GripVertical,
   Star,
   MoreHorizontal,
+  ArrowUp,
+  ArrowDown,
+  ChevronsUp,
+  ChevronsDown,
+  RotateCcw,
   Copy,
   Image as ImageIcon,
   Trash2,
@@ -170,7 +175,7 @@ const GalleryCard = ({
   onSelect: () => void;
   reorderMode?: boolean;
   isDragOver?: boolean;
-  onDragStart?: () => void;
+  onDragStart?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDragOver?: (e: React.DragEvent<HTMLDivElement>) => void;
   onDrop?: () => void;
   onDragEnd?: () => void;
@@ -400,7 +405,7 @@ const GalleryCard = ({
               return;
             }
             e.dataTransfer.effectAllowed = "move";
-            onDragStart?.();
+            onDragStart?.(e);
           }}
           className={`
             w-8 h-8
@@ -888,6 +893,222 @@ const GalleryCard = ({
             </div>
           </div>
         </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// ============================================================
+// REORDER CARD
+// Compact, Instagram-like card used exclusively in reorder mode.
+// ============================================================
+
+const ReorderCard = ({
+  project,
+  index,
+  total,
+  selected,
+  dragging,
+  dragOver,
+  onSelect,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  onMove,
+  onMoveToStart,
+  onMoveToEnd,
+}: {
+  project: GalleryProject;
+  index: number;
+  total: number;
+  selected: boolean;
+  dragging: boolean;
+  dragOver: boolean;
+  onSelect: () => void;
+  onDragStart: () => void;
+  onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
+  onDrop: () => void;
+  onDragEnd: () => void;
+  onMove: (direction: "up" | "down") => void;
+  onMoveToStart: () => void;
+  onMoveToEnd: () => void;
+}) => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  return (
+    <motion.div
+      layout
+      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      draggable
+      onDragStart={() => {
+        onDragStart?.();
+      }}
+      onDragOver={onDragOver}
+      onDrop={(e) => {
+        e.preventDefault();
+        onDrop();
+      }}
+      onDragEnd={onDragEnd}
+      className={`
+        relative min-w-0 select-none
+        ${dragging ? "opacity-40 scale-[0.97]" : ""}
+      `}
+    >
+      <div
+        className={`
+          relative overflow-hidden rounded-[22px] bg-admin-surface border
+          transition-all duration-200
+          ${
+            selected
+              ? "border-[#D26E87] ring-4 ring-[#D26E87]/10 shadow-[0_12px_30px_rgba(210,110,135,0.14)]"
+              : "border-admin-neutral/45 shadow-[0_5px_20px_rgba(45,32,37,0.05)] hover:border-[#D26E87]/35 hover:-translate-y-0.5"
+          }
+          ${dragOver ? "ring-2 ring-[#D26E87]/50 ring-offset-2" : ""}
+        `}
+      >
+        <div className="relative aspect-[4/5] overflow-hidden bg-admin-surface-2">
+          <SafeImage
+            src={project.image_url}
+            alt={project.title}
+            className="w-full h-full object-cover pointer-events-none"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-transparent pointer-events-none" />
+
+          {/* Position */}
+          <div className="absolute top-2.5 left-2.5 min-w-8 h-8 px-2 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center text-[11px] font-bold tabular-nums">
+            {index + 1}
+          </div>
+
+          {/* Selection */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect();
+            }}
+            className={`
+              absolute top-2.5 right-2.5 w-8 h-8 rounded-full
+              backdrop-blur-md border flex items-center justify-center
+              transition-all
+              ${
+                selected
+                  ? "bg-[#D26E87] border-[#D26E87] text-white"
+                  : "bg-black/45 border-white/30 text-white hover:bg-black/65"
+              }
+            `}
+            aria-label={selected ? "Deseleccionar" : "Seleccionar"}
+          >
+            {selected ? (
+              <Check className="w-4 h-4" strokeWidth={2.5} />
+            ) : (
+              <span className="w-3.5 h-3.5 rounded-[4px] border border-white/80" />
+            )}
+          </button>
+
+          {project.is_favorite && (
+            <div className="absolute left-2.5 bottom-2.5 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/92 backdrop-blur-md text-[#94710A] text-[9px] font-bold uppercase tracking-[0.1em] shadow-sm">
+              <Star className="w-3 h-3 fill-current" />
+              Destacado
+            </div>
+          )}
+
+          {!project.active && (
+            <div className="absolute right-2.5 bottom-2.5 px-2 py-1 rounded-full bg-black/55 backdrop-blur-md text-white text-[8px] font-bold uppercase tracking-[0.1em]">
+              Oculto
+            </div>
+          )}
+        </div>
+
+        <div className="p-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[12px] font-semibold text-admin-text truncate">
+              {project.title || "Sin título"}
+            </p>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setMenuOpen((v) => !v);
+              }}
+              className="w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-admin-text-muted hover:bg-admin-surface-2 hover:text-admin-text"
+              aria-label="Acciones de posición"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-admin-text-muted truncate">
+              {project.category}
+            </span>
+
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                disabled={index === 0}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMove("up");
+                }}
+                className="w-7 h-7 rounded-lg border border-admin-neutral/40 flex items-center justify-center text-admin-text-muted hover:text-admin-text hover:bg-admin-surface-2 disabled:opacity-25 disabled:cursor-not-allowed"
+                title="Subir una posición"
+              >
+                <ArrowUp className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                disabled={index === total - 1}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMove("down");
+                }}
+                className="w-7 h-7 rounded-lg border border-admin-neutral/40 flex items-center justify-center text-admin-text-muted hover:text-admin-text hover:bg-admin-surface-2 disabled:opacity-25 disabled:cursor-not-allowed"
+                title="Bajar una posición"
+              >
+                <ArrowDown className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 5, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 5, scale: 0.97 }}
+              className="absolute right-3 bottom-[62px] z-30 w-44 rounded-2xl border border-admin-neutral/50 bg-admin-surface shadow-[0_18px_50px_rgba(45,32,37,0.18)] p-1.5"
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  onMoveToStart();
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[11px] font-semibold text-admin-text hover:bg-admin-surface-2"
+              >
+                <ChevronsUp className="w-4 h-4 text-[#D26E87]" />
+                Mover al inicio
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  onMoveToEnd();
+                  setMenuOpen(false);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[11px] font-semibold text-admin-text hover:bg-admin-surface-2"
+              >
+                <ChevronsDown className="w-4 h-4 text-[#D26E87]" />
+                Mover al final
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
@@ -2156,6 +2377,54 @@ export const GalleryView = () => {
     });
   };
 
+  const reorderIds = (ids: string[], sourceId: string, targetIndex: number) => {
+    const sourceIndex = ids.indexOf(sourceId);
+    if (sourceIndex === -1) return ids;
+
+    const next = [...ids];
+    next.splice(sourceIndex, 1);
+
+    const safeIndex = Math.max(0, Math.min(targetIndex, next.length));
+    next.splice(safeIndex, 0, sourceId);
+
+    return next;
+  };
+
+  const moveProjectBy = (id: string, direction: "up" | "down") => {
+    setDraftOrder((current) => {
+      const index = current.indexOf(id);
+      if (index === -1) return current;
+
+      const target = direction === "up" ? index - 1 : index + 1;
+      if (target < 0 || target >= current.length) return current;
+
+      const next = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const moveProjectTo = (id: string, edge: "start" | "end") => {
+    setDraftOrder((current) => {
+      if (!current.includes(id)) return current;
+      return reorderIds(current, id, edge === "start" ? 0 : current.length);
+    });
+  };
+
+  const moveSelectedTo = (edge: "start" | "end") => {
+    if (selectedIds.length === 0) return;
+
+    setDraftOrder((current) => {
+      const selectedSet = new Set(selectedIds);
+      const selected = current.filter((id) => selectedSet.has(id));
+      const remaining = current.filter((id) => !selectedSet.has(id));
+
+      return edge === "start"
+        ? [...selected, ...remaining]
+        : [...remaining, ...selected];
+    });
+  };
+
   const startReordering = () => {
     setDraftOrder(projects.map((project) => project.id));
     setDraggingId(null);
@@ -2660,44 +2929,75 @@ export const GalleryView = () => {
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="
-            mb-8
-            rounded-[22px]
-            border
-            border-[#F0D5DD]
-            bg-[#FFF9FB]
-            px-5
-            py-4
-            flex
-            flex-col
-            sm:flex-row
-            sm:items-center
-            sm:justify-between
-            gap-4
-          "
+          className="mb-8 rounded-[24px] border border-[#F0D5DD] bg-[#FFF9FB] p-4 sm:p-5"
         >
-          <div className="flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white border border-[#F0DCE3] flex items-center justify-center shrink-0">
-              <GripVertical
-                className="w-4 h-4 text-[#D26E87]"
-                strokeWidth={1.8}
-              />
+          <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+            <div className="flex items-center gap-3 min-w-0 flex-1">
+              <div className="w-10 h-10 rounded-xl bg-white border border-[#F0DCE3] flex items-center justify-center shrink-0 shadow-sm">
+                <GripVertical className="w-4 h-4 text-[#D26E87]" />
+              </div>
+
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-[13px] font-semibold text-admin-text">
+                    Ordenar galería
+                  </p>
+                  <span className="px-2 py-1 rounded-full bg-white border border-[#F0DCE3] text-[9px] font-bold uppercase tracking-[0.11em] text-[#B83265]">
+                    {projects.length} trabajos
+                  </span>
+                  {selectedIds.length > 0 && (
+                    <span className="px-2 py-1 rounded-full bg-[#D26E87] text-white text-[9px] font-bold uppercase tracking-[0.11em]">
+                      {selectedIds.length} seleccionados
+                    </span>
+                  )}
+                </div>
+                <p className="text-[11px] text-admin-text-muted font-light mt-1">
+                  Arrastra una foto directamente a otra posición. También puedes
+                  seleccionar varias y moverlas juntas.
+                </p>
+              </div>
             </div>
 
-            <div>
-              <p className="text-[13px] font-semibold text-admin-text">
-                Modo de reordenamiento
-              </p>
-              <p className="text-[12px] text-admin-text-muted font-light mt-0.5">
-                Arrastra el control ⋮⋮ de cada proyecto para cambiar su
-                posición. El nuevo orden no se publicará hasta guardar.
-              </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedIds(
+                    selectedIds.length === projects.length
+                      ? []
+                      : projects.map((p) => p.id),
+                  )
+                }
+                className="h-9 px-3.5 rounded-full bg-white border border-[#E8D7DE] text-[10px] font-semibold text-admin-text hover:border-[#D26E87]/40 transition-colors"
+              >
+                {selectedIds.length === projects.length
+                  ? "Deseleccionar todo"
+                  : "Seleccionar todo"}
+              </button>
+
+              <button
+                type="button"
+                disabled={selectedIds.length === 0}
+                onClick={() => moveSelectedTo("start")}
+                className="h-9 px-3 rounded-full bg-white border border-[#E8D7DE] text-admin-text hover:border-[#D26E87]/40 disabled:opacity-35 disabled:cursor-not-allowed inline-flex items-center gap-1.5 text-[10px] font-semibold"
+                title="Mover selección al inicio"
+              >
+                <ChevronsUp className="w-3.5 h-3.5 text-[#D26E87]" />
+                Inicio
+              </button>
+
+              <button
+                type="button"
+                disabled={selectedIds.length === 0}
+                onClick={() => moveSelectedTo("end")}
+                className="h-9 px-3 rounded-full bg-white border border-[#E8D7DE] text-admin-text hover:border-[#D26E87]/40 disabled:opacity-35 disabled:cursor-not-allowed inline-flex items-center gap-1.5 text-[10px] font-semibold"
+                title="Mover selección al final"
+              >
+                <ChevronsDown className="w-3.5 h-3.5 text-[#D26E87]" />
+                Final
+              </button>
             </div>
           </div>
-
-          <span className="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-full bg-white border border-[#F0DCE3] text-[10px] font-bold uppercase tracking-[0.13em] text-[#B83265]">
-            {projects.length} proyectos
-          </span>
         </motion.div>
       )}
 
@@ -2705,7 +3005,85 @@ export const GalleryView = () => {
           CONTENT
           ======================================================== */}
 
-      {projects.length === 0 ? (
+      {reorderMode ? (
+        <section>
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="text-[18px] font-semibold text-admin-text tracking-tight">
+                Vista de orden
+              </h2>
+              <p className="text-[12px] text-admin-text-muted font-light mt-1">
+                La numeración representa exactamente el orden que tendrá la
+                galería pública.
+              </p>
+            </div>
+
+            <span className="hidden sm:inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-admin-text-muted">
+              <GripVertical className="w-3.5 h-3.5" />
+              Arrastra y suelta
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
+            <AnimatePresence mode="popLayout">
+              {orderedProjects.map((project, index) => (
+                <ReorderCard
+                  key={project.id}
+                  project={project}
+                  index={index}
+                  total={orderedProjects.length}
+                  selected={selectedIds.includes(project.id)}
+                  dragging={draggingId === project.id}
+                  dragOver={dragOverId === project.id}
+                  onSelect={() => toggleSelect(project.id)}
+                  onDragStart={() => setDraggingId(project.id)}
+                  onDragOver={(e) => {
+                    if (!draggingId || draggingId === project.id) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    setDragOverId(project.id);
+                  }}
+                  onDrop={() => {
+                    if (!draggingId || draggingId === project.id) return;
+                    moveProject(draggingId, project.id);
+                    setDraggingId(null);
+                    setDragOverId(null);
+                  }}
+                  onDragEnd={() => {
+                    setDraggingId(null);
+                    setDragOverId(null);
+                  }}
+                  onMove={(direction) => moveProjectBy(project.id, direction)}
+                  onMoveToStart={() => moveProjectTo(project.id, "start")}
+                  onMoveToEnd={() => moveProjectTo(project.id, "end")}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+
+          <div className="mt-7 rounded-[20px] border border-admin-neutral/40 bg-admin-surface px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-[11px] text-admin-text-muted">
+              <div className="w-7 h-7 rounded-lg bg-admin-surface-2 flex items-center justify-center">
+                <RotateCcw className="w-3.5 h-3.5" />
+              </div>
+              <span>
+                Los cambios son temporales hasta pulsar{" "}
+                <strong className="text-admin-text">Guardar orden</strong>.
+              </span>
+            </div>
+
+            {selectedIds.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setSelectedIds([])}
+                className="text-[10px] font-bold uppercase tracking-[0.11em] text-[#B83265] hover:underline"
+              >
+                Limpiar selección
+              </button>
+            )}
+          </div>
+        </section>
+      ) : projects.length === 0 ? (
         <div
           className="
             rounded-[28px]
