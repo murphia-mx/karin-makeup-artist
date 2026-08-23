@@ -8,6 +8,7 @@ const CATEGORIES: PortfolioCategory[] = [
   "Graduación",
   "Editorial",
   "Artístico",
+  "Peinados",
 ];
 
 interface Props {

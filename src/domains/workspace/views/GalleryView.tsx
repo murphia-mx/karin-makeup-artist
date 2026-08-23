@@ -52,7 +52,27 @@ const CATEGORIES = [
   "Editorial",
   "Graduación",
   "Artístico",
+  "Peinados",
 ];
+
+export const getSemanticTitle = (category: string): string => {
+  switch (category) {
+    case "Novias":
+      return "Maquillaje de Novia";
+    case "Editorial":
+      return "Look Editorial";
+    case "Social":
+      return "Look Social Elegante";
+    case "XV Años":
+      return "Maquillaje para XV Años";
+    case "Graduación":
+      return "Maquillaje de Graduación";
+    case "Peinados":
+      return "Peinado Elegante";
+    default:
+      return "Maquillaje Profesional";
+  }
+};
 
 // ============================================================
 // SAFE IMAGE
@@ -182,7 +202,40 @@ const GalleryCard = ({
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isUpdatingCategory, setIsUpdatingCategory] = useState(false);
+  
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editTitleValue, setEditTitleValue] = useState(project.title);
+  const [isSavingTitle, setIsSavingTitle] = useState(false);
+  
   const queryClient = useQueryClient();
+
+  const handleSaveTitle = async () => {
+    const trimmed = editTitleValue.trim();
+    if (!trimmed || trimmed === project.title) {
+      setIsEditingTitle(false);
+      setEditTitleValue(project.title);
+      return;
+    }
+
+    setIsSavingTitle(true);
+    try {
+      const { error } = await supabase
+        .from("gallery_projects")
+        .update({ title: trimmed })
+        .eq("id", project.id);
+
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ["workspace", "gallery"] });
+      queryClient.invalidateQueries({ queryKey: ["landing_gallery"] });
+      toast.success("Título actualizado");
+      setIsEditingTitle(false);
+    } catch (err: any) {
+      toast.error(`Error al actualizar título: ${err.message}`);
+    } finally {
+      setIsSavingTitle(false);
+    }
+  };
 
   const handleCategoryChange = async (newCategory: string) => {
     setIsUpdatingCategory(true);
@@ -549,21 +602,57 @@ const GalleryCard = ({
 
               <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4">
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <h3
-                      className="
-                        text-[19px]
-                        sm:text-[20px]
-                        font-semibold
-                        text-admin-text
-                        tracking-[-0.02em]
-                        truncate
-                      "
-                    >
-                      {project.title}
-                    </h3>
+                  <div className="flex items-center gap-2.5 min-w-0 group/title flex-1">
+                    {isEditingTitle ? (
+                      <div className="flex items-center gap-2 w-full">
+                        <input
+                          autoFocus
+                          type="text"
+                          value={editTitleValue}
+                          onChange={(e) => setEditTitleValue(e.target.value)}
+                          onBlur={handleSaveTitle}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveTitle();
+                            if (e.key === "Escape") {
+                              setIsEditingTitle(false);
+                              setEditTitleValue(project.title);
+                            }
+                          }}
+                          disabled={isSavingTitle}
+                          className="flex-1 px-3 py-1 text-[17px] sm:text-[18px] font-semibold text-admin-text bg-admin-surface-2 border border-admin-accent-dark/50 rounded-lg focus:outline-none focus:ring-2 focus:ring-admin-accent-dark/20"
+                        />
+                        {isSavingTitle && <Loader2 className="w-4 h-4 animate-spin text-admin-text-muted" />}
+                      </div>
+                    ) : (
+                      <>
+                        <h3
+                          onClick={() => setIsEditingTitle(true)}
+                          className="
+                            text-[19px]
+                            sm:text-[20px]
+                            font-semibold
+                            text-admin-text
+                            tracking-[-0.02em]
+                            truncate
+                            cursor-pointer
+                            hover:text-[#D26E87]
+                            transition-colors
+                          "
+                          title="Haz clic para editar el título"
+                        >
+                          {project.title}
+                        </h3>
+                        <button
+                          onClick={() => setIsEditingTitle(true)}
+                          className="opacity-0 group-hover/title:opacity-100 p-1 text-admin-text-muted hover:text-[#D26E87] transition-all rounded-md hover:bg-admin-surface-2 shrink-0"
+                          title="Editar título"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    )}
 
-                    {project.is_favorite && (
+                    {!isEditingTitle && project.is_favorite && (
                       <Star
                         className="w-4 h-4 shrink-0 text-[#B28A12] fill-[#B28A12]"
                         strokeWidth={1.8}
@@ -1716,7 +1805,7 @@ const GalleryMassUploadModal = ({ onClose }: { onClose: () => void }) => {
         data: { publicUrl },
       } = supabase.storage.from("public-assets").getPublicUrl(filePath);
 
-      const title = f.file.name.replace(/\.[^/.]+$/, "");
+      const title = getSemanticTitle(f.category);
 
       const { error: dbError } = await supabase
         .from("gallery_projects")

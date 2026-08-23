@@ -658,6 +658,7 @@ const ServiceSlideOver = ({
               <option value="graduaciones">Graduaciones</option>
               <option value="social">Social</option>
               <option value="editorial">Editorial</option>
+              <option value="peinados">Peinados</option>
             </select>
           </div>
 

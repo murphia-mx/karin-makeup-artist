@@ -9,6 +9,7 @@ const CATEGORIES = [
   "Editorial",
   "Graduación",
   "Artístico",
+  "Peinados",
 ];
 
 interface GalleryBulkActionsProps {

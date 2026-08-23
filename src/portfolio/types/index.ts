@@ -1,7 +1,7 @@
 export interface PortfolioItem {
   id: string;
   title: string;
-  category: "Novias" | "Social" | "XV Años" | "Graduación" | "Editorial" | "Artístico";
+  category: "Novias" | "Social" | "XV Años" | "Graduación" | "Editorial" | "Artístico" | "Peinados";
   image: string;
   thumbnail?: string;
   featured: boolean;
@@ -13,4 +13,4 @@ export interface PortfolioItem {
   createdAt: string;
 }
 
-export type PortfolioCategory = "Todas" | "Novias" | "Social" | "XV Años" | "Graduación" | "Editorial" | "Artístico";
+export type PortfolioCategory = "Todas" | "Novias" | "Social" | "XV Años" | "Graduación" | "Editorial" | "Artístico" | "Peinados";
