@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import type { PortfolioCategory } from "./types";
 
 import { Banner } from "./components/Banner";
@@ -13,6 +14,7 @@ import { usePublicContent } from "../domains/content/hooks/usePublicContent";
 
 export default function PortfolioPage() {
   const { models } = usePublicContent();
+  const location = useLocation();
 
   const landing = models?.landing;
   const dbItems = models?.fullGallery || [];
@@ -57,6 +59,50 @@ export default function PortfolioPage() {
       })
       .sort((a: any, b: any) => a.order - b.order);
   }, [activeCategory, searchQuery, dbItems]);
+
+  // Open project from URL if present
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const projectId = params.get('project');
+    if (projectId && filteredItems.length > 0) {
+      const idx = filteredItems.findIndex((i: any) => i.id === projectId);
+      if (idx !== -1) {
+        setLightboxIndex(idx);
+      }
+    }
+  }, [location.search, filteredItems]);
+
+  /* ====================================================================== */
+  /* PAGINATION                                                             */
+  /* ====================================================================== */
+
+  const ITEMS_PER_PAGE = 12;
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Reset page when filters change
+  useMemo(() => {
+    setCurrentPage(1);
+  }, [activeCategory, searchQuery]);
+
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+  const paginatedItems = filteredItems.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 400, behavior: "smooth" });
+  };
+
+  const getPageNumbers = (current: number, total: number) => {
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    
+    if (current <= 4) return [1, 2, 3, 4, 5, '...', total];
+    if (current >= total - 3) return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+    
+    return [1, '...', current - 1, current, current + 1, '...', total];
+  };
 
   /* ====================================================================== */
   /* UI                                                                     */
@@ -391,17 +437,73 @@ export default function PortfolioPage() {
                 : "pt-1"
             }
           >
-            {filteredItems.length > 0 ? (
-              <PortfolioGrid
-                items={filteredItems}
-                onItemClick={(item) => {
-                  const idx = filteredItems.findIndex(
-                    (i: any) => i.id === item.id,
-                  );
+            {paginatedItems.length > 0 ? (
+              <>
+                <PortfolioGrid
+                  items={paginatedItems}
+                  onItemClick={(item) => {
+                    const idx = filteredItems.findIndex(
+                      (i: any) => i.id === item.id,
+                    );
+                    setLightboxIndex(idx);
+                  }}
+                />
+                
+                {/* ============================================================ */}
+                {/* PAGINACIÓN EDITORIAL                                           */}
+                {/* ============================================================ */}
+                {totalPages > 1 && (
+                  <div className="mt-20 flex flex-col items-center justify-center gap-6">
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1}
+                        className="group flex h-9 w-9 items-center justify-center rounded-full border border-[#472332]/10 bg-transparent text-[#472332] transition-all hover:border-[#ca6480] hover:text-[#ca6480] disabled:opacity-30 disabled:pointer-events-none"
+                      >
+                        <span className="text-lg leading-none mb-1">‹</span>
+                      </button>
+                      
+                      <div className="flex items-center gap-1 mx-2">
+                        {getPageNumbers(currentPage, totalPages).map((page, idx) => {
+                          if (page === "...") {
+                            return (
+                              <span key={`dots-${idx}`} className="px-2 text-[#472332]/40 text-xs">
+                                ...
+                              </span>
+                            );
+                          }
+                          
+                          const isCurrent = page === currentPage;
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => handlePageChange(page as number)}
+                              className={`
+                                flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-medium transition-all
+                                ${
+                                  isCurrent 
+                                    ? "bg-[#ca6480] text-white shadow-sm" 
+                                    : "bg-transparent text-[#472332]/70 hover:bg-[#ca6480]/10 hover:text-[#472332]"
+                                }
+                              `}
+                            >
+                              {page}
+                            </button>
+                          );
+                        })}
+                      </div>
 
-                  setLightboxIndex(idx);
-                }}
-              />
+                      <button
+                        onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                        disabled={currentPage === totalPages}
+                        className="group flex h-9 w-9 items-center justify-center rounded-full border border-[#472332]/10 bg-transparent text-[#472332] transition-all hover:border-[#ca6480] hover:text-[#ca6480] disabled:opacity-30 disabled:pointer-events-none"
+                      >
+                        <span className="text-lg leading-none mb-1">›</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
             ) : (
               <div
                 className="

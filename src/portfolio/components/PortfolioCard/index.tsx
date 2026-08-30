@@ -196,7 +196,7 @@ export function PortfolioCard({ item, onClick }: Props) {
           sm:p-6
         "
       >
-        {/* Category */}
+        {/* Category & Featured */}
         <motion.div
           initial={false}
           className="
@@ -210,20 +210,14 @@ export function PortfolioCard({ item, onClick }: Props) {
             group-hover:-translate-y-1
           "
         >
-          <span className="h-px w-5 bg-white/60" />
-
-          <span
-            className="
-              font-sans
-              text-[8px]
-              font-semibold
-              uppercase
-              tracking-[0.24em]
-              text-white/80
-            "
-          >
-            {item.serviceType || item.category}
-          </span>
+          {(item.serviceType || item.category) && (
+            <span className="flex items-center gap-1 font-sans text-[8px] font-semibold uppercase tracking-[0.24em] text-[rgb(210,110,135)] bg-white/95 px-2 py-1 rounded-sm shadow-sm">
+              <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" className="opacity-90">
+                <circle cx="12" cy="12" r="6" />
+              </svg>
+              {item.serviceType || item.category}
+            </span>
+          )}
         </motion.div>
 
         {/* Title */}

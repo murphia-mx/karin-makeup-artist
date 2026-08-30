@@ -1,29 +1,88 @@
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, MessageCircleHeart } from "lucide-react";
+import { Plus, MessageCircleHeart, ChevronLeft, ChevronRight } from "lucide-react";
 import { ReviewList } from "./ReviewList";
 import { ReviewStepper } from "./ReviewStepper/ReviewStepper";
-// import { EmptyState } from '../../../components/ui/States/EmptyState'; // Assuming we handle empty states here or ignore if they aren't needed, but user wants them.
 
 interface ReviewsSectionProps {
   testimonials?: any;
 }
 
+const REVIEWS_PER_PAGE = 6;
+
+function getPageNumbers(currentPage: number, totalPages: number) {
+  if (totalPages <= 6) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+  
+  if (currentPage <= 3) {
+    return [1, 2, 3, 4, '...', totalPages];
+  } else if (currentPage >= totalPages - 2) {
+    return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+  } else {
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  }
+}
+
 export const ReviewsSection = ({ testimonials }: ReviewsSectionProps) => {
   const [isStepperOpen, setIsStepperOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const sectionRef = useRef<HTMLElement>(null);
 
-  // Fallbacks & Unique combination logic
   const featured = testimonials?.featuredReviews || [];
   const reviews = testimonials?.allReviews || [];
-  const allUniqueReviews = [
-    ...featured,
-    ...reviews.filter((r: any) => !featured.some((f: any) => f.id === r.id)),
-  ].slice(0, 6);
-  const featuredIds = featured.map((f: any) => f.id);
+  
+  const allUniqueReviews = useMemo(() => {
+    // 1. Los destacados primero, manteniendo su orden actual.
+    const featuredItems = [...featured];
+    
+    // 2. Filtrar los normales (que no estén en los destacados)
+    const normalItems = reviews.filter((r: any) => !featuredItems.some((f: any) => f.id === r.id));
+    
+    // 3. Ordenar los normales por fecha DESC (más reciente primero)
+    normalItems.sort((a: any, b: any) => {
+      const dateA = new Date(a.created_at || 0).getTime();
+      const dateB = new Date(b.created_at || 0).getTime();
+      return dateB - dateA;
+    });
+    
+    // 4. Unir ambos arrays
+    return [
+      ...featuredItems,
+      ...normalItems,
+    ];
+  }, [featured, reviews]);
+  
+  const featuredIds = useMemo(() => featured.map((f: any) => f.id), [featured]);
+
+  const totalPages = Math.ceil(allUniqueReviews.length / REVIEWS_PER_PAGE);
+
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const currentReviews = useMemo(() => {
+    const startIndex = (currentPage - 1) * REVIEWS_PER_PAGE;
+    return allUniqueReviews.slice(startIndex, startIndex + REVIEWS_PER_PAGE);
+  }, [allUniqueReviews, currentPage]);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    if (sectionRef.current) {
+      const yOffset = -80; // Ajuste para header fijo si existe
+      const y = sectionRef.current.getBoundingClientRect().top + window.scrollY + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
+  const pages = getPageNumbers(currentPage, totalPages);
 
   return (
     <section
       id="testimonios"
+      ref={sectionRef}
       className="w-full py-28 md:py-36 overflow-hidden relative"
       style={{ backgroundColor: "rgb(255, 254, 253)" }}
     >
@@ -121,7 +180,7 @@ export const ReviewsSection = ({ testimonials }: ReviewsSectionProps) => {
 
         {/* Lista de Reseñas */}
         {allUniqueReviews.length > 0 ? (
-          <ReviewList reviews={allUniqueReviews} featuredIds={featuredIds} />
+          <ReviewList reviews={currentReviews} featuredIds={featuredIds} />
         ) : (
           <div className="w-full flex justify-center items-center pt-8 pb-16 md:pt-10 md:pb-24 relative">
             {/* Glow radial súper tenue detrás de la card */}
@@ -152,6 +211,51 @@ export const ReviewsSection = ({ testimonials }: ReviewsSectionProps) => {
                 confianza.
               </p>
             </motion.div>
+          </div>
+        )}
+
+        {/* Paginación */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-1.5 md:gap-2 mt-14 w-full">
+            <button 
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              aria-label="Página anterior"
+              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full text-[rgb(74,36,50)] disabled:opacity-30 transition-colors hover:bg-[rgba(210,110,135,0.08)] disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(210,110,135)]"
+            >
+              <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+
+            {pages.map((p, i) => (
+              p === '...' ? (
+                <span key={`ellipsis-${i}`} className="w-6 md:w-8 flex items-center justify-center text-[rgba(74,36,50,0.4)] font-sans">
+                  &hellip;
+                </span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => handlePageChange(p as number)}
+                  aria-label={`Ir a página ${p}`}
+                  aria-current={currentPage === p ? "page" : undefined}
+                  className={`w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full font-sans text-[13px] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(210,110,135)]
+                    ${currentPage === p 
+                      ? "bg-[rgb(210,110,135)] text-white font-medium shadow-[0_4px_12px_rgba(210,110,135,0.25)]" 
+                      : "text-[rgb(74,36,50)] hover:bg-[rgba(210,110,135,0.08)]"
+                    }`}
+                >
+                  {p}
+                </button>
+              )
+            ))}
+
+            <button 
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              aria-label="Página siguiente"
+              className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full text-[rgb(74,36,50)] disabled:opacity-30 transition-colors hover:bg-[rgba(210,110,135,0.08)] disabled:hover:bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(210,110,135)]"
+            >
+              <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
+            </button>
           </div>
         )}
       </div>
